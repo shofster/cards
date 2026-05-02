@@ -116,7 +116,7 @@ func initGameUI() *fyne.Container {
 	diff := widget.NewLabel("")
 	handResult.AddListener(binding.NewDataListener(func() {
 		r, _ := handResult.Get()
-		diff.SetText(fmt.Sprintf("Result Points: %d", r))
+		diff.SetText(fmt.Sprintf("Hand Result: %+d", r))
 	}))
 	resultGrid.Add(diff)
 

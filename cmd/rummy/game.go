@@ -97,12 +97,24 @@ func deal() {
 
 }
 
+/*
+
+KNOCK WIN:      winner gets (deadwoodDiff)
+UNDERCUT:       winner gets (abs(deadwoodDiff) + 25)
+GIN:            winner gets (opponentDeadwood + 25)
+LOSER:          always 0
+
+RESULT:   tells you direction (win/loss)
+SCORE:    tells winner points earned
+
+*/
+
 func processKnock(knocker int) {
 	knockee := 1 - knocker
 
 	var result Result
-	var rawDiff int // true scoring diff (knocker perspective)
-	var uiDiff int  // player-perspective diff (UI only)
+	var rawDiff int    // true scoring diff (knocker perspective)
+	var resultDiff int // player-perspective diff (UI only)
 	var layoffDelta int
 
 	if !game.started { // first turn - draw
@@ -115,7 +127,7 @@ func processKnock(knocker int) {
 		result.KnockedOut = false
 
 		rawDiff = 0
-		uiDiff = 0
+		resultDiff = 0
 	} else {
 		// original deadwood for knockee
 		preKnockee := computeMelds(game.Hands[knockee]).DeadwoodPoints
@@ -124,7 +136,7 @@ func processKnock(knocker int) {
 		// scoring diff (knocker perspective)
 		rawDiff = result.Diff
 		// scoring diff (player perspective)
-		uiDiff = rawDiff * (1 - 2*knocker)
+		resultDiff = rawDiff * (1 - 2*knocker)
 		// Layoff delta
 		postKnockee := result.KnockeePoints
 		layoffDelta = preKnockee - postKnockee
@@ -132,33 +144,37 @@ func processKnock(knocker int) {
 
 	// display winner position
 	switch {
-	case uiDiff == 0:
+	case resultDiff == 0:
 		_ = winnerData.Set("NOONE - IT's a DRAW")
-	case uiDiff > 0:
+	case resultDiff > 0:
 		_ = winnerData.Set("PLAYER")
-	case uiDiff < 0:
+	case resultDiff < 0:
 		_ = winnerData.Set("DEALER")
 	}
 
-	// points (knocker/knockee perspective)
-	knockerPoints := result.KnockerPoints
-	knockeePoints := result.KnockeePoints
+	// BASE SCORING (diff-based, not deadwood-based)
+	knockerPoints := 0
+	knockeePoints := 0
 
-	// GIN bonus
+	if rawDiff > 0 { // knocker wins
+		knockerPoints = rawDiff
+	} else if rawDiff < 0 { // knockee wins (undercut)
+		knockeePoints = -rawDiff
+	}
+
+	// GIN BONUS
 	if result.Gin {
-		if knocker == 0 { // player (0)
-			knockerPoints += knockeePoints + 25
-		} else { // dealer (1)
-			knockerPoints += knockeePoints + 25
+		if rawDiff > 0 { // knocker gins
+			knockerPoints += result.KnockeePoints + 25
+		} else { // knockee gins
+			knockeePoints += result.KnockerPoints + 25
 		}
 	}
 
-	// UNDERCUT
-	// Knockee wins by undercut → knockee gets +25
+	// UNDERCUT BONUS
 	if result.KnockedOut && rawDiff < 0 {
 		knockeePoints += 25
 	}
-	// Knocker gets undercut bonus only if dealer knocked and player wins
 	if result.KnockedOut && rawDiff > 0 {
 		knockerPoints += 25
 	}
@@ -189,90 +205,7 @@ func processKnock(knocker int) {
 
 	_ = playerData.Set(playerPoints)
 	_ = dealerData.Set(dealerPoints)
-	_ = handResult.Set(uiDiff)
-
-	showDealerHand()
-	if !devMode {
-		_ = dealerMeld.Set(computeMelds(game.Hands[1]).toString())
-	}
-
-	resetPlayerHand()
-	playerKnockButton.Disable()
-	showScoreCenter()
-}
-
-func xprocessKnock(knocker int) {
-
-	knockee := 1 - knocker
-
-	var result Result
-	var diff int
-	var layoffDelta = 0
-
-	if !game.started {
-		playerResults := computeMelds(game.Hands[0])
-		dealerResults := computeMelds(game.Hands[1])
-		result.KnockerPoints = playerResults.DeadwoodPoints
-		result.KnockeePoints = dealerResults.DeadwoodPoints
-		diff = 0
-		result.Gin = false
-		result.KnockedOut = false
-	} else {
-		preKnockee := computeMelds(game.Hands[knockee]).DeadwoodPoints
-		result = resolveKnock(game.Hands[knocker], game.Hands[knockee])
-		diff = result.Diff * (1 - 2*knocker)
-		postKnockee := result.KnockeePoints
-		layoffDelta = preKnockee - postKnockee
-	}
-	switch {
-	case diff == 0:
-		_ = winnerData.Set("NOONE - IT's a DRAW")
-		result.KnockedOut = false
-	case diff > 0:
-		_ = winnerData.Set("PLAYER")
-	case diff < 0:
-		_ = winnerData.Set("DEALER")
-	}
-
-	playerPoints := result.KnockerPoints
-	dealerPoints := result.KnockeePoints
-
-	if knocker == 1 { // dealer knocked
-		playerPoints, dealerPoints = dealerPoints, playerPoints
-	}
-
-	// GIN bonus
-	if result.Gin {
-		if diff > 0 { // player gins
-			playerPoints += result.KnockeePoints + 25
-		} else { // dealer gins
-			dealerPoints += result.KnockerPoints + 25
-		}
-	}
-	// UNDERCUT
-	if result.KnockedOut && diff < 0 { // knockee wins by undercut
-		dealerPoints += 25
-	} else if result.KnockedOut && diff > 0 {
-		// player undercuts dealer (if dealer knocked)
-		playerPoints += 25
-	}
-
-	var outcome string
-	switch {
-	case result.Gin:
-		outcome = "GIN (+25)"
-	case result.KnockedOut && diff != 0:
-		outcome = "UNDERCUT (+25)"
-	case layoffDelta > 0:
-		outcome = "KNOCK (with layoffs)"
-	default:
-		outcome = "KNOCK"
-	}
-	_ = outcomeData.Set(outcome)
-
-	_ = playerData.Set(playerPoints)
-	_ = dealerData.Set(dealerPoints)
-	_ = handResult.Set(diff)
+	_ = handResult.Set(resultDiff)
 
 	showDealerHand()
 	if !devMode {
