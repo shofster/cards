@@ -90,6 +90,12 @@ func (h *HandManager) setCardFace(idx int, card common.Card) *common.CardImage {
 }
 
 func (h *HandManager) CommitSelection() {
+
+	//fmt.Printf("COMMIT: trickSelection=%d (%s)\n",
+	//	h.trickSelection,
+	//	common.Icon(h.cards[h.trickSelection].Rank,
+	//		h.cards[h.trickSelection].Suit))
+
 	if h.trickSelection == -1 {
 		return // no card chosen
 	}
@@ -117,6 +123,12 @@ func NewSouthHandManager(cards []common.Card) *HandManager {
 			ci.SetDimmed(false)
 			ci.OnTap = func(tapped *common.CardImage) {
 				if h.active == 1 {
+
+					//fmt.Printf("TAP SOUTH: trickSelection=%d → %d (%s)\n",
+					//	h.trickSelection, tapped.ID,
+					//	common.Icon(h.cards[tapped.ID].Rank,
+					//		h.cards[tapped.ID].Suit))
+
 					if h.trickSelection != -1 {
 						previous := h.stack.Objects[h.trickSelection].(*common.CardImage)
 						previous.SetDimmed(false)
@@ -140,7 +152,11 @@ func NewSouthHandManager(cards []common.Card) *HandManager {
 
 	h.play = func(_, _ common.Suit) { h.active = 1 }
 
-	h.reveal = func() {}
+	h.reveal = func() {
+		for i := 0; i < 13; i++ {
+			h.setCardFace(i, cards[i])
+		}
+	}
 
 	return h
 }
@@ -160,6 +176,12 @@ func NewNorthHandManager(cards []common.Card) *HandManager {
 			ci.SetDimmed(false)
 			ci.OnTap = func(tapped *common.CardImage) {
 				if h.active == 2 {
+
+					//fmt.Printf("TAP NORTH: trickSelection=%d → %d (%s)\n",
+					//	h.trickSelection, tapped.ID,
+					//	common.Icon(h.cards[tapped.ID].Rank,
+					//		h.cards[tapped.ID].Suit))
+
 					if h.trickSelection != -1 {
 						previous := h.stack.Objects[h.trickSelection].(*common.CardImage)
 						previous.SetDimmed(false)
@@ -183,7 +205,11 @@ func NewNorthHandManager(cards []common.Card) *HandManager {
 
 	h.play = func(_, _ common.Suit) { h.active = 2 }
 
-	h.reveal = func() {}
+	h.reveal = func() {
+		for i := 0; i < 13; i++ {
+			h.setCardFace(i, cards[i])
+		}
+	}
 
 	return h
 }
@@ -219,6 +245,7 @@ func renigCommon(h *HandManager, leadSuit common.Suit) {
 			// disable any previously used card
 			ci.SetDimmed(true)
 			ci.Enabled = false
+			ci.Replace(cardMap["reverse"].Resource)
 
 		case leadSuit == common.NoSuit:
 			// on opening lead, any card is OK

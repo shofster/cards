@@ -165,11 +165,6 @@ func commitTrick() {
 
 func finishTrick() {
 
-	// done with the trick - disable ALL commits
-	for i := 0; i < 4; i++ {
-		commits[i].Disable()
-	}
-
 	// build cards in order of position led
 	trickCards := buildTrickCards(g.leadPlayer)
 	relativeWinner := winnerOfTrick(
@@ -181,6 +176,12 @@ func finishTrick() {
 
 	trickStates.SetCard(g.trickNumber, playerToPosition(winner)[:1])
 	// fmt.Sprintf("%d", winner))
+
+	//done with the trick - disable ALL commits
+	for i := 0; i < 4; i++ {
+		commits[i].Disable()
+		managers[i].trickSelection = -1
+	}
 
 	g.trickNumber++
 	if g.trickNumber == 13 {
@@ -203,8 +204,10 @@ func finishTrick() {
 		common.StringSet(dealResult, s)
 		common.IntSet(aboveLine, common.IntGet(aboveLine)+above)
 		common.IntSet(belowLine, common.IntGet(belowLine)+below)
-		eastManager.RevealAll()
+		southManager.RevealAll()
 		westManager.RevealAll()
+		northManager.RevealAll()
+		eastManager.RevealAll()
 		resetPlayedCards()
 		return
 	}
@@ -215,6 +218,11 @@ func finishTrick() {
 		g.player = winner
 		g.leadSuit = common.NoSuit
 		resetPlayedCards() // reset played cards
+		for i := 0; i < 4; i++ {
+			commits[i].Disable()
+			managers[i].trickSelection = -1
+		}
+
 		trickPlayer()
 	}
 	if winner == East || winner == West {
