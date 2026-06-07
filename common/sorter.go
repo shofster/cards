@@ -35,7 +35,7 @@ func suitOrder(s Suit) int {
 	}
 }
 
-// Alternate order to make red,black,res,black
+// Alternate order to make red,black,red,black
 func altSuitOrder(s Suit) int {
 	switch s {
 	case Clubs:
@@ -104,6 +104,20 @@ func SortHand(cards []Card) {
 	})
 }
 
+func SortHandLow(cards []Card) {
+
+	sort.Slice(cards, func(i, j int) bool {
+		ci, cj := cards[i], cards[j]
+		// Suit
+		si, sj := suitOrder(ci.Suit), suitOrder(cj.Suit)
+		if si != sj {
+			return si < sj
+		}
+		// Suit by Rank
+		return rankOrder(ci.Rank) > rankOrder(cj.Rank)
+	})
+}
+
 func AltSortHand(cards []Card) {
 	sort.Slice(cards, func(i, j int) bool {
 		ci, cj := cards[i], cards[j]
@@ -115,4 +129,24 @@ func AltSortHand(cards []Card) {
 		// Suit by Rank
 		return rankOrder(ci.Rank) < rankOrder(cj.Rank)
 	})
+}
+
+// AceHighOrdinal maps Rank (Ace=14) into Ace-high (default) ordering.
+func AceHighOrdinal(r Rank) int {
+	return int(r)
+}
+
+// AceLowOrdinal maps Rank (Ace=14) into Ace-low ordering.
+// i.e.-- Ace → 1, Two → 2, ..., King → 13.
+func AceLowOrdinal(r Rank) int {
+	switch r {
+	case Ace:
+		return 1
+	case Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten,
+		Jack, Queen, King:
+		return int(r) // 2 thru 13
+	case Reverse:
+		return -1
+	}
+	return 0
 }

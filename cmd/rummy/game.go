@@ -1,7 +1,7 @@
 package main
 
 import (
-	"games/common"
+	"cards/common"
 	"log"
 
 	"fyne.io/fyne/v2/canvas"
@@ -28,7 +28,7 @@ var cardDeck []string
 type Game struct {
 	Stock           []string
 	Discard         string
-	Hands           [][]common.Card // [0]=player, [1]=dealer
+	Hands           []common.Cards // [0]=player, [1]=dealer
 	discardSelected int
 	discard         common.Card
 	started         bool

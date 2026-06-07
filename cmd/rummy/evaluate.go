@@ -1,7 +1,7 @@
 package main
 
 import (
-	"games/common"
+	"cards/common"
 )
 
 /*

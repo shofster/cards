@@ -1,6 +1,6 @@
 package common
 
-import "games/assets"
+import "cards/assets"
 
 /*
 

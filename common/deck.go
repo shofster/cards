@@ -52,12 +52,12 @@ func Shuffle(deck []string) {
 }
 
 // Deal nCards to nHands, return remaining deck.
-func Deal(deck []string, nHands, nCards int) ([][]Card, []string) {
+func Deal(deck []string, nHands, nCards int) ([]Cards, []string) {
 	if nHands*nCards > len(deck) {
 		panic(fmt.Sprintf("Deal %d exceeds deck size %d",
 			nHands*nCards, len(deck)))
 	}
-	hands := make([][]Card, nHands)
+	hands := make([]Cards, nHands)
 	for i := range hands {
 		hands[i] = make([]Card, 0, nCards)
 	}

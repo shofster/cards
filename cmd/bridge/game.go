@@ -1,8 +1,8 @@
 package main
 
 import (
+	"cards/common"
 	"fmt"
-	"games/common"
 	"time"
 
 	"fyne.io/fyne/v2/widget"
@@ -25,7 +25,7 @@ import (
 
 var cardMap = map[string]common.Card{}
 var cardDeck []string
-var hands [][]common.Card
+var hands []common.Cards
 var trickStates *common.CardStrip
 
 var southManager *HandManager

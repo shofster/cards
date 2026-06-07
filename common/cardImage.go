@@ -115,10 +115,28 @@ func (r *cardImageRenderer) Objects() []fyne.CanvasObject {
 
 func (r *cardImageRenderer) Destroy() {}
 
+func (c *CardImage) Reset(res fyne.Resource) {
+	c.Enabled = false
+	c.OnTap = nil
+	c.Highlighted = false
+	c.HiLite.Hide()
+	c.Dim.Hide()
+	c.Replace(res)
+}
+
 func (c *CardImage) Replace(res fyne.Resource) {
 	img := canvas.NewImageFromResource(res)
 	img.FillMode = canvas.ImageFillContain
 	c.Img = img
+	c.Refresh()
+}
+
+func (c *CardImage) SetDim(on bool) {
+	if on {
+		c.Dim.Show()
+	} else {
+		c.Dim.Hide()
+	}
 	c.Refresh()
 }
 

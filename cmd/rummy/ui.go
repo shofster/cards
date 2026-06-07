@@ -1,8 +1,8 @@
 package main
 
 import (
+	"cards/common"
 	"fmt"
-	"games/common"
 	"image/color"
 
 	"fyne.io/fyne/v2"

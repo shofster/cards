@@ -1,7 +1,7 @@
 package main
 
 import (
-	"games/common"
+	"cards/common"
 	"sort"
 
 	"fyne.io/fyne/v2"

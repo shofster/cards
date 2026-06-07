@@ -1,8 +1,8 @@
 package main
 
 import (
+	"cards/common"
 	"fmt"
-	"games/common"
 	"strconv"
 
 	"fyne.io/fyne/v2/canvas"

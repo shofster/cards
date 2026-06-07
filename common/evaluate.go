@@ -107,7 +107,7 @@ func (h HandRank) String() string {
 	}
 }
 
-func Best5of7(cards []Card) FinalRank {
+func Best5of7(cards Cards) FinalRank {
 	best := FinalRank{} // zero = worst hand
 
 	var five [5]Card
@@ -331,4 +331,16 @@ func (a FinalRank) betterThan(b FinalRank) bool {
 
 	// Completely equal
 	return false
+}
+
+// cribbage
+func (c *Card) PegValue() int {
+	switch c.Rank {
+	case Ace:
+		return 1
+	case Jack, Queen, King:
+		return 10
+	default:
+		return int(c.Rank)
+	}
 }

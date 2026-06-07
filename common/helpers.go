@@ -61,3 +61,19 @@ func BoolSet(st binding.Bool, v bool) bool {
 	_ = st.Set(v)
 	return v
 }
+func Ternary[T any](cond bool, yes, no T) T {
+	if cond {
+		return yes
+	}
+	return no
+}
+
+// IfElse. Not a generic.
+// closure potentially can cause side effects within its scope.
+func IfElse(cond bool, yes, no func()) {
+	if cond {
+		yes()
+	} else {
+		no()
+	}
+}
