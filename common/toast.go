@@ -39,7 +39,7 @@ func Toast(can fyne.Canvas, pos fyne.Position, txt string, c color.NRGBA, d time
 	txt = fmt.Sprintf("  %s  ", txt)
 
 	sc := c     // start color
-	sc.A = 0x80 //0x11
+	sc.A = 0x11 //0x11
 	ec := c     // end color
 	ec.A = 0xff
 	t := canvas.NewText(txt, sc)
@@ -68,8 +68,8 @@ func Toast(can fyne.Canvas, pos fyne.Position, txt string, c color.NRGBA, d time
 		pop.ShowAtPosition(pos)
 		a.Start()
 		pop.Show()
+		time.Sleep(2 * d)
 		fyne.Do(func() {
-			time.Sleep(2 * d)
 			pop.Hide()
 		})
 	}()

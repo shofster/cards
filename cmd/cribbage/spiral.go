@@ -136,9 +136,10 @@ func alphaForDist(dist int) uint8 {
 }
 
 func (st *SpiralTracks) advanceA(to int) {
-	st.posA = max(0, st.posA-1)
+	to-- // make index
 	to = min(max(to, 0), len(st.a)-1)
-	for i := st.posA; i < to; i++ {
+	st.posA = to
+	for i := 0; i <= to; i++ {
 		d := to - i
 		a := alphaForDist(d)
 		st.a[i].FillColor = color.NRGBA{
@@ -148,14 +149,14 @@ func (st *SpiralTracks) advanceA(to int) {
 			A: a,
 		}
 	}
-	st.posA = to
-	fyne.DoAndWait(func() { st.c.Refresh() })
+	fyne.Do(func() { st.c.Refresh() })
 }
 
 func (st *SpiralTracks) advanceB(to int) {
-	st.posB = max(0, st.posB-1)
+	to-- // make inde
 	to = min(max(to, 0), len(st.b)-1)
-	for i := st.posB; i < to; i++ {
+	st.posB = to
+	for i := 0; i <= to; i++ {
 		d := to - i
 		a := alphaForDist(d)
 		st.b[i].FillColor = color.NRGBA{
@@ -164,15 +165,6 @@ func (st *SpiralTracks) advanceB(to int) {
 			B: st.colorB.B,
 			A: a,
 		}
-
-		//st.b[i].Refresh()
-
-		//fyne.Do(func() {
-		//	time.Sleep(time.Duration(st.Delay) * time.Millisecond)
-		//	st.b[i].Refresh()
-		//})
-		//if i != to-1 {
-		//}
 	}
 	st.posB = to
 	fyne.Do(func() { st.c.Refresh() })

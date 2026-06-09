@@ -69,6 +69,7 @@ func initGlobalVariables() {
 	Ctx.aiName = Ctx.app.Preferences().StringWithFallback(aiNameKey, "Suckling")
 	Ctx.app.Preferences().SetString(aiNameKey, Ctx.aiName)
 	Ctx.debug = Ctx.app.Preferences().BoolWithFallback(debugKey, false)
+	Ctx.app.Preferences().SetBool(debugKey, Ctx.debug)
 
 	Ctx.cardMap = common.CardMap() // icon vs Card
 

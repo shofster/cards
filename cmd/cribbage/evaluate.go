@@ -31,28 +31,36 @@ func scorePegging(who int, card common.Card, pegged []common.Card, total int) in
 	reason := ""
 	switch total {
 	case 15:
-		log.Printf("scorePegging-15: who %d total %d scored 2\n",
-			who, total)
+		if Ctx.debug {
+			log.Printf("scorePegging-15: who %d total %d scored 2\n",
+				who, total)
+		}
 		points += 2
 		reason = "15"
 	case 31:
-		log.Printf("scorePegging-31: who %d total %d scored 2\n",
-			who, total)
+		if Ctx.debug {
+			log.Printf("scorePegging-31: who %d total %d scored 2\n",
+				who, total)
+		}
 		points += 2
 		reason = "31"
 	}
 	pp := pairPoints(card, pegged)
 	if pp > 0 { // 2 or more
 		points += pp
-		log.Printf("scorePegging-pairs: who %d total %d scored %d\n",
-			who, total, pp)
+		if Ctx.debug {
+			log.Printf("scorePegging-pairs: who %d total %d scored %d\n",
+				who, total, pp)
+		}
 		reason = "pair"
 	}
 	pp = runPoints(pegged)
 	if pp > 0 { // 3 or more
 		points += pp
-		log.Printf("scorePegging-run: who %d total %d scored %d\n",
-			who, total, pp)
+		if Ctx.debug {
+			log.Printf("scorePegging-run: who %d total %d scored %d\n",
+				who, total, pp)
+		}
 		reason = "run"
 	}
 	// apply points to "who"
@@ -149,8 +157,6 @@ func scoreHand(hand common.Cards, starter common.Card) int {
 	score += scoreRun
 	score += scoreFl
 	score += scoreNob
-	//log.Printf("scoreHand: 15 %d, pair %d, run %d, flush %d, nob %d\n",
-	//	score15, scorePair, scoreRun, scoreFl, scoreNob)
 
 	return score
 }

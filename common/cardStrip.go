@@ -51,6 +51,7 @@ func NewCardStrip(nCards int) *CardStrip {
 		item.AddListener(binding.NewDataListener(func() {
 			v, _ := item.Get()
 			formatted.Set("[" + v + "]")
+			fyne.Do(func() { l.Refresh() })
 			//l.Refresh()
 		}))
 

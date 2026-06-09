@@ -23,23 +23,31 @@ import (
   Description:
 */
 
+var duration = time.Second * 1
+
+const defaultDuration = time.Second * 1
+const handScoreDuration = time.Second * 3
+
 func scorePoints(who, points int, reason string) {
-	duration := time.Second * 1
-	switch who {
-	case PLAYER:
-		common.IntSet(Ctx.playerScore, common.IntGet(Ctx.playerScore)+points)
-		spiral.advanceA(points)
-		common.Toast(Ctx.mainWindow.Canvas(), fyne.Position{
-			X: 10,
-			Y: 10,
-		}, fmt.Sprintf("PLAYER: %d (%s)", points, reason), common.FailColor, duration)
-	case AI:
-		common.IntSet(Ctx.aiScore, common.IntGet(Ctx.aiScore)+points)
-		spiral.advanceB(points)
-		common.Toast(Ctx.mainWindow.Canvas(), fyne.Position{
-			X: 10,
-			Y: 50,
-		}, fmt.Sprintf("AI: %d (%s)", points, reason), common.InfoColor, duration)
+	if points > 0 {
+		switch who {
+		case PLAYER:
+			p := common.IntGet(Ctx.playerScore) + points
+			common.IntSet(Ctx.playerScore, p)
+			common.Toast(Ctx.mainWindow.Canvas(), fyne.Position{
+				X: 10,
+				Y: 10,
+			}, fmt.Sprintf("PLAYER: %d (%s)", points, reason), common.FailColor, duration)
+			spiral.advanceA(p)
+		case AI:
+			p := common.IntGet(Ctx.aiScore) + points
+			common.IntSet(Ctx.aiScore, p)
+			common.Toast(Ctx.mainWindow.Canvas(), fyne.Position{
+				X: 10,
+				Y: 50,
+			}, fmt.Sprintf("AI: %d (%s)", points, reason), common.InfoColor, duration)
+			spiral.advanceB(p)
+		}
 	}
 }
 

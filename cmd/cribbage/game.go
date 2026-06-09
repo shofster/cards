@@ -207,6 +207,7 @@ func peggingAction(who int) {
 	// transition to SCORE action
 	if count == 31 || (aiGO && playerGO) {
 		peggingButtonState(-1)
+		duration = handScoreDuration
 		scoreButton.Enable()
 		return
 	}
@@ -222,6 +223,7 @@ func deal() {
 
 	count = 0
 	pegged = nil
+	duration = defaultDuration
 	common.IntSet(Ctx.handPoints, 0)
 	lanes[PLAYER].Reset()
 	lanes[AI].Reset()
