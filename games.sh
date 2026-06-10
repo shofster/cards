@@ -43,6 +43,7 @@ mkdir -p "$DIST"
 # ------------------------------------------------------------
 if [ "$OS" = "Darwin" ]; then
     if [ -d "cmd/$APP/$APP.app" ]; then
+        chmod +x "cmd/$APP/$APP.app/Content/MacOS/$APP"
         cp -R "cmd/$APP/$APP.app" "$DIST/"
 
         echo "Creating DMG for $APP"
