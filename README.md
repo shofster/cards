@@ -8,6 +8,7 @@ This project includes six single‑player card games:
 - **Jokers Wild** – Points‑based duel with special scoring rules shown in Settings.
 - **Bridge** – South is the bidder and declarer; North is partner; East/West are AI defenders.
 - **Rummy** – Single‑player Gin/Rummy with an AI opponent.
+- **Cribbage** – Single‑player Cribbage with an AI opponent.
 
 
 All functions are covered by a MIT license and free for use.
@@ -145,7 +146,7 @@ Push. All wagers (ante + bets) are returned to the wallet.
 
 ### ♠ ♣ ♥ ♦  —  ♠ ♣ ♥ ♦
 
-## 5. (Bridge) Single Player Bridge
+## 5. (Bridge) Single Player vs 2 AI Opponents Bridge
 
 South is always the declarer.  
 North is partner (dummy).  
@@ -173,7 +174,7 @@ Vulnerability is not used.
 
 ### ♠ ♣ ♥ ♦  —  ♠ ♣ ♥ ♦
 
-## 6. (Rummy) Gin/Rummy
+## 6. (Rummy) Single Player vs AI Gin/Rummy
 
 A single‑player Gin/Rummy variant.  
 The player discards and draws forming melds; the AI defender plays a simplified opponent strategy.  
@@ -198,6 +199,56 @@ Deadwood count determines knock and gin outcomes.
 - **Undercut:** If the opponent has lower deadwood, the opponent scores the difference in deadwood + 25 bonus points.
 
 
+### ♠ ♣ ♥ ♦  —  ♠ ♣ ♥ ♦
+
+## 6. (Cribbage) Single Player vs AI Cribbage
+
+A single‑player Cribbage variant.
+The PLAYER is the logged-in user.
+AI is Sir John Suckling.
+A 2 track spiral peg board (121 holes, each) displays scores.
+
+### Gameplay
+
+- The first Dealer is the lowest card in a "deck cut".
+- Dealer alternates on each hand.
+- Deal: Each side receives 6 cards.
+- Each sides selects 2 cards for discard to the (hidden) Crib.
+- A single card (the starter) is chosen (and shown).
+- The non-dealer plays a card, followed by the dealer.
+- Cards are alternately player and scored (Pegging)
+- Cards are played and scored until the count is >= 31.
+- Scored and Total points are visually displayed for PLAYER and AI.
+- The hand is complete (and scored) when neither can play.
+- The hand(s) are scored including the starter card,
+with the dealer also getting the Crib's hand score.
+- A new hand is dealt until the first to 121 pegs.
+
+
+
+### Scoring
+
+**Pegging Scoring:**
+- 2 Points for count of 15.
+- 2 Points for count of 31.
+- 2 or more for pairs.
+- 3 or more for runs.
+- 1 Point for card played after Opponent is unable.
+
+**Hand Scoring:**
+Score hands in strict order:
+1. NON-DEALER hand
+2. DEALER hand
+3. CRIB (belongs to current dealer)
+
+For each hand:
+- Count 15s
+- Count pairs
+- Count runs
+- Flush (4 or 5)
+- His Nobs (a Jack matching starter suit)
+
+
 --------------------------------------------------------------
 
 ## Tech Stuff
@@ -210,7 +261,6 @@ Builds scripts are provided for Windows, MacOS, and LINUX OS'es
 Each app is a standalone Go executable:
 No external dependencies beyond Fyne.IO.
 Shared components:
-
 - Card (rank, suit, resource)
 - CardMap (canonical lookup)
 - Deck (52‑card slice with random shuffle)
@@ -231,7 +281,8 @@ Each app has the same structure:
 
 Application configuration files ("preferences.json") are located in the
 standard fyne storage directory with the directory name "com.scsi.XXXX",
-where XXXX is "bridge", "rummy" "jacks", "stud5", "joker", or "holdem".<br>
+where XXXX is "bridge", "rummy" "jacks", "stud5", "joker", "cribbage"
+or "holdem".<br>
 Windows: ~\AppData\Roaming\fyne\APP<br>
 MacOS:    ~/Library/Preferences/fyne/APP<br>
 Linux:   ~/.config/fyne/APP<br>
@@ -243,6 +294,7 @@ Where:
 - com.scsi.joker
 - com.scsi.bridge
 - com.scsi.rummy
+- com.scsi.cribbage
 
 
 ---
