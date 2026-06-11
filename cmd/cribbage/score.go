@@ -70,6 +70,14 @@ For each hand:
 Add points to appropriate score
 */
 
+func debugKeep(cards []common.Card) string {
+	return fmt.Sprintf("%s:%d,%s:%d,%s:%d,%s:%d",
+		cards[0].Icon, cribValue(cards[0]),
+		cards[1].Icon, cribValue(cards[1]),
+		cards[2].Icon, cribValue(cards[2]),
+		cards[3].Icon, cribValue(cards[3]))
+}
+
 func scoreAction() {
 
 	dealButton.Enable()
@@ -83,23 +91,29 @@ func scoreAction() {
 
 	if dealer == AI {
 		// PLAYER hand
+		//		fmt.Printf("%-8s - ", "PLAYER")
 		p := scoreHand(keeps[PLAYER], starter)
 		scorePoints(PLAYER, p, "Hand")
 		if common.IntGet(Ctx.playerScore) < 121 {
 			// AI hand
+			//			fmt.Printf("%-8s - ", "AI")
 			a := scoreHand(keeps[AI], starter)
 			// Crib
+			//			fmt.Printf("%-8s %s - ", "CRIB", debugKeep(crib))
 			c := scoreHand(crib, starter)
 			scorePoints(AI, a+c, "Crib")
 		}
 	} else {
 		// AI hand
+		//		fmt.Printf("%-8s - ", "AI")
 		a := scoreHand(keeps[AI], starter)
 		scorePoints(AI, a, "Hand")
 		if common.IntGet(Ctx.aiScore) < 121 {
 			// PLAYER hand
+			//			fmt.Printf("%-8s - ", "PLAYER")
 			p := scoreHand(keeps[PLAYER], starter)
 			// Crib
+			//			fmt.Printf("%-8s %s - ", "CRIB", debugKeep(crib))
 			c := scoreHand(crib, starter)
 			scorePoints(PLAYER, p+c, "Crib")
 		}

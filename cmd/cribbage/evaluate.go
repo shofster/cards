@@ -157,6 +157,8 @@ func scoreHand(hand common.Cards, starter common.Card) int {
 	score += scoreRun
 	score += scoreFl
 	score += scoreNob
+	//fmt.Printf("15:%d, pair:%d, run:%d, flush:%d, nob:%d - total:%d\n",
+	//	score15, scorePair, scoreRun, scoreFl, scoreNob, score)
 
 	return score
 }
@@ -196,10 +198,14 @@ func score15s(cards common.Cards) int {
 }
 
 func cribValue(c common.Card) int {
-	if c.Rank >= 10 {
+	switch c.Rank {
+	case common.Ace:
+		return 1
+	case common.Jack, common.Queen, common.King, common.Ten:
 		return 10
+	default:
+		return int(c.Rank)
 	}
-	return int(c.Rank)
 }
 
 func scorePairs(cards common.Cards) int {

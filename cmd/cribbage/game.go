@@ -282,17 +282,6 @@ func deal() {
 
 	}
 
-	// AI has already discarded
-	var aiDiscard common.Cards
-	_, aiDiscard = chooseDiscard(hands[AI], dealer == AI)
-	crib = append(crib, aiDiscard...)
-	// show "used" and unpickable
-	hands[AI][aiDiscard[0].Index].Selected = true
-	hands[AI][aiDiscard[1].Index].Selected = true
-	aiStack.Objects[aiDiscard[0].Index].(*common.CardImage).Reset(Ctx.cardMap["reverse"].Resource)
-	aiStack.Objects[aiDiscard[1].Index].(*common.CardImage).Reset(Ctx.cardMap["reverse"].Resource)
-	aiStack.Refresh()
-
 	common.SortHandLow(hands[PLAYER])
 	for i := range hands[PLAYER] {
 		hands[PLAYER][i].Index = i
