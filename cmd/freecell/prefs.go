@@ -31,12 +31,14 @@ type Global struct {
 	cardSizeWidth  float32
 	cardSizeHeight float32
 	cardOffset     int
+	dragSize       int
 	debug          bool
 }
 
 var Ctx Global
 
 const debugKey = "debug"
+const dragSizeKey = "drag"
 
 // initialize the global (and storage) variables.
 func initGlobalVariables() {
@@ -52,9 +54,11 @@ func setTheme() {
 	Ctx.cardSizeWidth = float32(p.FloatWithFallback("cardSizeWidth", 90))
 	Ctx.cardSizeHeight = float32(p.FloatWithFallback("cardSizeHeight", 110))
 	Ctx.cardOffset = p.IntWithFallback("cardOffset", 30)
+	Ctx.dragSize = p.IntWithFallback(dragSizeKey, 20)
 	p.SetFloat("cardSizeWidth", float64(Ctx.cardSizeWidth))
 	p.SetFloat("cardSizeHeight", float64(Ctx.cardSizeHeight))
 	p.SetInt("cardOffset", Ctx.cardOffset)
+	p.SetInt("dragSizeKey", Ctx.dragSize)
 	Ctx.theme = &freecellTheme{}
 
 }

@@ -105,9 +105,8 @@ func (c *Card) String() string {
 	return c.Icon
 }
 
-// parse Rank and Suit from the Card's Icon
-func (c *Card) RankSuit() (rank Rank, suit Suit) {
-	r := []rune(c.Icon)
+func RankSuit(icon string) (rank Rank, suit Suit) {
+	r := []rune(icon)
 	rankStr := string(r[:len(r)-1])
 	suitRune := r[len(r)-1]
 	// parse rank
@@ -136,6 +135,12 @@ func (c *Card) RankSuit() (rank Rank, suit Suit) {
 		suit = Spades
 	}
 	return
+
+}
+
+// parse Rank and Suit from the Card's Icon
+func (c *Card) RankSuit() (rank Rank, suit Suit) {
+	return RankSuit(c.Icon)
 }
 
 type Cards []Card
@@ -229,4 +234,12 @@ func SubsetsOf(cards Cards, k int) []Cards {
 	}
 
 	return out
+}
+
+// check if two suits are the same color.
+// if both are red both hearts/diamonds = true -> true
+// if both are black both clubs/spades = false -> true
+func IsSameColor(a, b Suit) bool {
+	return (a == Hearts || a == Diamonds) ==
+		(b == Hearts || b == Diamonds)
 }

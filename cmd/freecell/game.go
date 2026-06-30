@@ -21,170 +21,182 @@ import (
   Description: main game for FreeCell
 */
 
-type Location int
+/*
 
-const (
-	EmptyColumn Location = iota
-	CardColumn
-	FreeCell
-	Foundation
-)
+	// Card relationships
+	// CardItem(w/Card):CardImage(w/Resource):Geometry(position and size)
+	//   related by index and/or CellItemId
 
-// a combined int for use as CardImage.ID
-type CellItemId int
 
-func cellItemId(loc Location, ix int) CellItemId {
-	return CellItemId(int(loc<<8) | ix)
-}
-func cellItemLocation(id CellItemId) Location {
-	return Location(id >> 8)
-}
-func cellItemIndex(id CellItemId) int {
-	return int(id & 0xff)
-}
+GameState contains the CellItems for each of the cards:
+   for Free and Foundation [4]
+   for Cards [8][n]
+      type CellItem struct {
+		id         CellItemId
+		card       common.Card
+			type Card struct {
+				rank     Rank
+				suit     Suit
+				icon     string
+				resource fyne.Resource
+				......  other
+		....  other
 
-type CellItem struct {
-	id CellItemId
-	common.Card
-	buried bool
-}
+--------------------
 
-type GameState struct {
-	CardColumns [8]common.Cards // 8 columns
-	FreeCells   [4]*common.Card // nil = empty
-	Foundation  [4]int          // highest per suit (0=empty, Ace -> King)
-}
+FreeCells[col] is always a single CellItem with:
+    Location = Free
+    card = emptyCard() when empty
+        ... and card.Icon = "empty" for emptiness testing
 
-var (
-	undos []Move
-)
+  The CardImage stack (freeStack) for a FreeCell has only one object:
+    When empty:
+        ID = (Empty, 0, 0)
+        resource = emptyCard().Icon
+    When filled:
+        ID = (Free, col, 0)
+        resource = the real card.Icon
+
+
+Foundation[col] is always a single CellItem with:
+    Location = Foundation
+    card = emptyCard() when empty
+        ... and card.Icon = "empty" for emptiness testing
+
+  The CardImage stack (foundationStack) for a Foundation has only one object:
+    When empty:
+        resource = emptyCard().Icon
+    When filled:
+        resource = the real card.Icon
+
+
+Cards[col] is a []CellItem with:
+    Location = Cards
+    When empty:
+        slice is nil or length 0
+        CardImage stack has a single Empty card object
+    When cards are added/removed:
+        update the Cards[col] slice
+        rebuild the CardImage stack from the slice
+
+  The CardImage stack (cardStacks) for each Card Column has:
+    When empty: 1 Object
+        ID = (Empty, 0, 0)
+        resource = emptyCard().Icon
+    When filled: same len as the []*CellItem
+        ID = (Cards, col, 0)
+        resource = the real card.Icon
+
+
+*/
 
 func deal() {
+
 	undos = nil
 	undoButton.Disable()
-}
-func undo() {
 
-}
+	cardDeck = common.NewDeck() // []string
+	common.Shuffle(cardDeck)
+	var col = 0
 
-func freeValue(rank common.Rank) int {
-	switch rank {
-	case common.Ace:
-		return 1
-	case common.Jack, common.Queen, common.King:
-		return 10
-	default:
-		return int(rank)
+	for col = 0; col < 4; col++ {
+		gameState.FreeCells[col] = NewCellItem(Free, col, 0, emptyCard())
+		gameState.FoundationCells[col] = NewCellItem(Foundation, col, 0, emptyCard())
 	}
+	resetFreeCellImages(&gameState, freeGrid)
+	resetFoundationCellImages(&gameState, foundationGrid)
+
+	// Build Cards and Image relationships
+	dx := 0 // distribute the 52 cards
+	for col = 0; col < 8; col++ {
+		gameState.CardCells[col] = make([]*CellItem, 0)
+		n := 7
+		if col > 3 {
+			n = 6
+		}
+		for ix := 0; ix < n; ix++ {
+			icon := cardDeck[dx]
+			rank, suit := common.RankSuit(icon)
+			if rank == common.Ace {
+				rank = common.Two - 1
+			}
+			card := common.Card{
+				Rank:     rank,
+				Suit:     suit,
+				Icon:     icon,
+				Resource: Ctx.cardMap[icon].Resource,
+			}
+			gameState.CardCells[col] = append(gameState.CardCells[col],
+				NewCellItem(Cards, col, ix, card))
+			dx++
+		}
+	}
+	for col = 0; col < 8; col++ {
+		resetCardColumnImages(col, &gameState)
+	}
+	tracker.Event = mouseMove  // for testing use trackMouse
+	tracker.Click = mouseClick // for testing use nil
 }
 
-func PushUndo(mv Move) {
+func pushUndo(mv Move) {
+	undos = nil
 	undos = append(undos, mv)
 	undoButton.Enable()
 }
-func PopUndo() (Move, bool) {
-	if !CanUndo() {
-		return Move{}, false
-	}
-	n := len(undos) - 1
-	mv := undos[n]
-	undos = undos[:n]
-	if len(undos) < 1 {
-		undoButton.Disable()
-	}
-	return mv, true
-}
-func CanUndo() bool {
-	return len(undos) > 0
+func popUndo() {
+	mv := undos[0]
+	undos = nil
+	performMove(&gameState, mv.seq, mv.dest, mv.src, true)
+	undoButton.Disable()
 }
 
-func (gs *GameState) IsWin() bool {
-	for _, v := range gs.Foundation {
-		if v != 10 {
-			return false
-		}
-	}
-	return true
+type GameState struct {
+	FreeCells       [4]*CellItem   // 4 columns - 1 deep
+	FoundationCells [4]*CellItem   // 4 columns - 1 deep
+	CardCells       [8][]*CellItem // 8 columns - n deep, overlapped
 }
 
-type BoardGeometry struct {
-	FreeCellRect   [4]fyne.Position
-	FoundationRect [4]fyne.Position
-	ColumnX        [8]float32
-	ColumnY        float32
+type Move struct {
+	src  CellItemId
+	dest CellItemId
+	seq  []CellItemId // len = 1 for single card
 }
 
-/*
-func HitTest(x, y float32) (region RegionType, col int, card int) {
-	slotW := Ctx.cardSizeWidth
-	slotH := Ctx.cardSizeHeight
-	offset := Ctx.cardSizeHeight * 0.22
+var (
+	gameState GameState
+	cardDeck  []string // 52 Card Icons (shuffled)
+	geometry  Geometry // recomputed on every mouse movement
+	undos     []Move   // a single Move for undo-ing
+)
 
-	// --- FreeCells / Foundations ---
-	if y >= topRowY && y <= topRowY+slotH {
-		idx := int(x / slotW)
-		switch {
-		case idx >= 0 && idx < 4:
-			return RegionFreeCell, idx, -1
-		case idx >= 4 && idx < 8:
-			return RegionFoundation, idx - 4, -1
+// return the CellItem that the mouse is "inside"
+func findCellItem(mouse fyne.Position) CellItemId {
+	for col := 0; col < 4; col++ {
+		if isInside(geometry.FreeGrid[col], mouse) {
+			return NewCellItemId(Free, col, 0)
+		}
+		if isInside(geometry.FoundationGrid[col], mouse) {
+			return NewCellItemId(Foundation, col, 0)
 		}
 	}
-
-	// --- Tableau ---
-	if y >= tableauY {
-		col = int(x / slotW)
-		if col < 0 || col >= 8 {
-			return RegionNone, -1, -1
-		}
-
-		relY := y - tableauY
-		card = int(relY / offset)
-
-		if card >= len(cardStacks[col].Objects) {
-			card = len(cardStacks[col].Objects) - 1
-		}
-
-		return RegionColumn, col, card
-	}
-
-	return RegionNone, -1, -1
-}
-*/
-/*
-
-func() {
-
-	slotWidth  := Ctx.cardSizeWidth
-	slotHeight := Ctx.cardSizeHeight
-
-	// Y must be inside the top row
-	if y >= topRowY && y <= topRowY+slotHeight {
-		index := int(x / slotWidth)
-		if index >= 0 && index < 4 {
-			return RegionFreeCell, index
-		}
-		if index >= 4 && index < 8 {
-			return RegionFoundation, index-4
+	for col := 0; col < 8; col++ {
+		ix := cardAt(geometry.CardGrids[col], mouse)
+		if ix >= 0 {
+			return NewCellItemId(Cards, col, ix)
 		}
 	}
-
-	if y < tableauY {
-		return RegionNone
-	}
-	col := int(x / Ctx.cardSizeWidth)
-	if col < 0 || col >= 8 {
-		return RegionNone
-	}
-	relY := y - tableauY
-	index := int(relY / offset)
-
-	if index >= len(columnCards) {
-		index = len(columnCards) - 1
-	}
-
-
-
+	return NewCellItemId(Empty, 0, 0)
 }
 
-*/
+func getCellItem(gs *GameState, loc Location, col, idx int) *CellItem {
+	switch loc {
+	case Free:
+		return gs.FreeCells[col]
+	case Foundation:
+		return gs.FoundationCells[col]
+	case Cards:
+		return gs.CardCells[col][idx]
+	default:
+		return nil
+	}
+}

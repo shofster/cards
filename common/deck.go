@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"math/rand/v2"
 	"time"
 )
@@ -53,24 +52,21 @@ func Shuffle(deck []string) {
 
 // Deal nCards to nHands, return remaining deck.
 func Deal(deck []string, nHands, nCards int) ([]Cards, []string) {
-	if nHands*nCards > len(deck) {
-		panic(fmt.Sprintf("Deal %d exceeds deck size %d",
-			nHands*nCards, len(deck)))
-	}
 	hands := make([]Cards, nHands)
 	for i := range hands {
-		hands[i] = make([]Card, 0, nCards)
+		hands[i] = make([]Card, 0)
 	}
 	idx := 0
 	for c := 0; c < nCards; c++ {
 		for h := 0; h < nHands; h++ {
 			code := deck[idx]
-			//card := assets.CardMap()[code]
 			hands[h] = append(hands[h], CardMap()[code])
 			idx++
+			if idx >= len(deck) {
+				return hands, nil
+			}
 		}
 	}
-
 	return hands, deck[idx:]
 
 }

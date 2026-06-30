@@ -73,7 +73,7 @@ func main() {
 	photo.FillMode = canvas.ImageFillContain
 	splash := container.NewStack(photo)
 	Ctx.mainWindow.SetContent(splash)
-	Ctx.mainWindow.Resize(fyne.NewSize(900, 500))
+	Ctx.mainWindow.Resize(fyne.NewSize(900, 550))
 
 	go func() { // show photo for a bit
 		initGlobalVariables()

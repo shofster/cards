@@ -1,6 +1,9 @@
 package main
 
-import "cards/common"
+import (
+	"cards/common"
+	"fmt"
+)
 
 /*
 
@@ -36,8 +39,8 @@ const HintMoveLowValue = 40
 var Hints = map[int]string{
 	ReasonNoLegal:          "No available legal move",
 	HintMoveSafeFoundation: "Safe foundation move",
-	HintMoveAceFoundation:  "Move Ace to foundation",
-	HintMoveTwoFoundation:  "Move Two to foundation",
+	HintMoveAceFoundation:  "Move Ace dest foundation",
+	HintMoveTwoFoundation:  "Move Two dest foundation",
 	HintMoveSafeCardColumn: "Safe Card Column move",
 	HintFreeCardColumn:     "Free a card column",
 	HintKingCardColumn:     "Place King in empty card column",
@@ -47,159 +50,174 @@ var Hints = map[int]string{
 	HintMoveLowValue:       "Low-value move",
 }
 
-// Hint represents a suggested move with a reason.
-type Hint struct {
-	Move   Move
-	Reason int
-	Score  int
-}
+func isValidSequence(gs *GameState, src *CellItem, seqLen int) bool {
+	loc, col, idx := decodeCellItemId(src.id)
+	// only Cards columns can have sequences
+	if loc != Cards {
+		return seqLen == 1
+	}
 
-// find the best :-) available hint based on game state.
-func HintMove(gs *GameState) *Hint {
-	moves := GenerateLegalMoves(gs)
-	if len(moves) == 0 {
-		return &Hint{
-			Reason: ReasonNoLegal,
-			Score:  0,
+	cards := gs.CardCells[col]
+	// does sequence fit in column
+	if idx+seqLen > len(cards) {
+		return false
+	}
+	// insure descending alternating sequence
+	for i := idx; i < idx+seqLen-1; i++ {
+		a := cards[i]
+		b := cards[i+1]
+		if common.IsSameColor(a.card.Suit, b.card.Suit) {
+			return false
+		}
+		if a.card.Rank != b.card.Rank+1 {
+			return false
 		}
 	}
-	var best *Hint
-	for _, mv := range moves {
-		score, reason := scoreMove(gs, mv)
-		h := &Hint{
-			Move:   mv,
-			Reason: reason,
-			Score:  score,
+	return true
+}
+
+func canMoveSequence(gs *GameState, seq []CellItemId, dest CellItemId) bool {
+	if len(seq) == 0 || dest == 0 {
+		return false
+	}
+
+	// destination parameters
+	dl, dc, _ := decodeCellItemId(dest)
+
+	// decode the first card in sequence
+	src := seq[0]
+	sl, sc, sx := decodeCellItemId(src)
+
+	// the source CellItem
+	var srcItem *CellItem
+	switch sl {
+	case Free:
+		srcItem = gs.FreeCells[sc]
+	case Foundation:
+		srcItem = gs.FoundationCells[sc]
+	case Cards:
+		srcItem = gs.CardCells[sc][sx]
+	}
+
+	if srcItem == nil {
+		return false
+	}
+
+	switch dl { // destination
+	case Free:
+		// single cards to free
+		if len(seq) != 1 {
+			return false
 		}
-		if best == nil || h.Score > best.Score {
-			best = h
+		return canMoveToFree(gs, gs.FreeCells[dc])
+
+	case Foundation:
+		// single cards to foundation
+		if len(seq) != 1 {
+			return false
 		}
+		return canMoveToFoundation(gs, srcItem, dest)
+
+	case Cards:
+		// multi-card sequence to cards
+		return canMoveSequenceToCards(gs, srcItem, dc, len(seq))
 	}
-	return best
+
+	return false
 }
 
-// create a score and reason.
-func scoreMove(state *GameState, move Move) (int, int) {
-	c := move.Card
-	// Aces to Foundation - best move
-	if c.Rank == common.Ace && move.To == Foundation {
-		return 100, HintMoveAceFoundation
-	}
-	// Twos → Foundation (if Ace already there)
-	if c.Rank == common.Two && move.To == Foundation && state.FoundationHas(freeValue(common.Ace), c.Suit) {
-		return 90, HintMoveTwoFoundation
-	}
-	// Safe foundation move
-	if move.To == Foundation && isSafeFoundationMove(state, c) {
-		return 80, HintMoveSafeFoundation
-	}
-	// Free a column
-	if move.To == EmptyColumn && move.From == CardColumn {
-		return 75, HintFreeCardColumn
-	}
-	// continue a descending alternating run
-	if move.To == CardColumn && isGoodSequenceExtension(state, move) {
-		return 60, HintExtendAltSeq
-	}
-	// enqble a sequence
-	if enablesSequence(state, move) {
-		return 50, HintEnableSeq
-	}
-	// King to empty column
-	if c.Rank == common.King && move.To == EmptyColumn {
-		return 40, HintKingCardColumn
-	}
-	// any legal move
-	if move.To == CardColumn {
-		return 20, HintMoveSafeCardColumn
-	}
-	// park in a free cell - if not last one
-	if move.To == FreeCell && state.FreeCellCount() > 1 {
-		return 10, HintParkFreeCell
-	}
-	// any
-	return 1, HintMoveLowValue
+// must be Empty
+func canMoveToFree(_ *GameState, dest *CellItem) bool {
+	return isEmptyCard(dest)
 }
 
-// safe if no lower card of same suit is buried
-func isSafeFoundationMove(gs *GameState, c common.Card) bool {
-	return !gs.IsLowerCardBuried(c)
+// Empty or same suit 1 rank greater
+// ♣ = 0, ♦ = 1, ♥ = 2, ♠ = 3
+func canMoveToFoundation(gs *GameState, src *CellItem, dest CellItemId) (r bool) {
+	dc := common.Suit(dest.column())
+	if src.card.Suit != dc {
+		return false
+	}
+	top := gs.FoundationCells[dc]
+	if isEmptyCard(top) {
+		r = src.card.Rank == 1
+	} else {
+		r = src.card.Rank == top.card.Rank+1
+	}
+	if Ctx.debug {
+		fmt.Printf("canMoveToFoundation: src= %s (%s), top=%s [%t]\n",
+			src.id, src.card.Icon, top.card.Icon, r)
+	}
+
+	return
 }
 
-// check alternating color + rank-1
-func isGoodSequenceExtension(gs *GameState, mv Move) bool {
-	return gs.ValidSequenceExtension(mv)
+// opposite color, 1 rank less.
+func canMoveToCards(gs *GameState, src *CellItem, column int) bool {
+
+	if Ctx.debug {
+		fmt.Printf("canMoveToCards: src= %s (%s) cardColumn %d\n",
+			src.id, src.card.Icon, column)
+	}
+
+	col := gs.CardCells[column]
+	if len(col) == 0 { // only Kings
+		return src.card.Rank == common.King
+	}
+	top := col[len(col)-1]
+	if common.IsSameColor(top.card.Suit, src.card.Suit) {
+		return false
+	}
+	// one rank lower
+	return src.card.Rank+1 == top.card.Rank
 }
 
-// exposes a needed card?
-func enablesSequence(gs *GameState, mv Move) bool {
-	return gs.ExposesUsefulCard(mv)
+func canMoveSequenceToCards(gs *GameState, src *CellItem, column int, seqLen int) bool {
+	col := gs.CardCells[column]
+	if len(col) == 0 { // catch moving a King.. sequence - only the King is OK
+		return seqLen == 1 && src.card.Rank == common.King
+	}
+	if !isValidSequence(gs, src, seqLen) {
+		return false
+	}
+	return canMoveToCards(gs, src, column)
 }
 
-// total count of emptty Free Cells
-func (gs *GameState) FreeCellCount() int {
+//  ---------------------------------------  //
+
+func isEmptyCard(ci *CellItem) bool {
+	return ci.card.Icon == EmptyCardIcon
+}
+
+// count of empty Free Cells.
+func freeCellCount(gs *GameState) int {
 	n := 0
-	for _, c := range gs.FreeCells {
-		if c == nil {
+	for _, ci := range gs.FreeCells {
+		if isEmptyCard(ci) {
 			n++
 		}
 	}
 	return n
 }
 
-// check if a lower rank card is buried
-func (gs *GameState) IsLowerCardBuried(c common.Card) bool {
-	target := freeValue(c.Rank) - 1
-	if target < 1 {
+/*  MICROSOFT rule - NOT NEEDED / WANTED in this version
+
+in func canMoveSequenceToCards
+
+	// can only move if room for each card to be moved
+	// individually (to Free or Cards)
+	if seqLen > moveableCellCount(gs) {
 		return false
 	}
-	for _, col := range gs.CardColumns {
-		for _, card := range col {
-			if card.Suit == c.Suit && freeValue(card.Rank) == target {
-				return true
-			}
-		}
-	}
-	return false
+
+
+// count of places to move - dumb rule :-)
+// can only move if room for each card to be moved
+// individually (to Free or Cards)
+func moveableCellCount(gs *GameState) int {
+	free := freeCellCount(gs)
+	emptyCardCols := emptyCardsCount(gs)
+	return (free + 1) * (1 << emptyCardCols)
 }
 
-// chack if a sequence extension
-func (gs *GameState) ValidSequenceExtension(mv Move) bool {
-	if mv.To != CardColumn {
-		return false
-	}
-	dest := gs.CardColumns[mv.ToIndex]
-	if len(dest) == 0 {
-		return false
-	}
-	top := dest[len(dest)-1]
-	// alternating colors
-	if sameColor(top.Suit, mv.Card.Suit) {
-		return false
-	}
-	// descending by 1
-	return mv.Card.Rank+1 == top.Rank
-}
-
-// check if would expose a card
-func (gs *GameState) ExposesUsefulCard(mv Move) bool {
-	if mv.From != CardColumn {
-		return false
-	}
-	col := gs.CardColumns[mv.FromIndex]
-	if len(col) < 2 {
-		return false
-	}
-	under := col[len(col)-2]
-	// useful if the next foundation card
-	return freeValue(under.Rank) == gs.Foundation[under.Suit]+1
-}
-
-// check if same color ("♣" and "♠" - black, "♦" and "♥" - red)
-func sameColor(a, b common.Suit) bool {
-	return (a == common.Hearts || a == common.Diamonds) ==
-		(b == common.Hearts || b == common.Diamonds)
-}
-func (gs *GameState) FoundationHas(value int, suit common.Suit) bool {
-	return gs.Foundation[suit] >= value
-}
+*/
