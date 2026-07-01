@@ -2,6 +2,7 @@ package main
 
 import (
 	"cards/common"
+	"fmt"
 )
 
 /*
@@ -16,7 +17,7 @@ import (
 
 */
 /*
-  Description:
+  Description: generate a "best" move - similar to evaluate functions.
 */
 
 var HintMap = map[int]string{
@@ -35,7 +36,7 @@ var HintMap = map[int]string{
 	0:   "Hints are OFF            ", // UI message when Hints are OFF
 }
 
-// Hint represents a Move with a score / reason
+// Hint represents a Move with a score (reason)
 type Hint struct {
 	move  Move
 	score int
@@ -54,14 +55,21 @@ func moveHint(gs *GameState) {
 	var best Hint
 	for _, mv := range moves {
 		score := scoreMove(gs, mv)
-		h := Hint{
-			move:  mv,
-			score: score,
-		}
-		if h.score > best.score {
-			best = h
+		if score > 0 {
+			if Ctx.debug {
+				fmt.Printf(" - score %d\n", score)
+			}
+			h := Hint{
+				move:  mv,
+				score: score,
+			}
+			if h.score > best.score {
+				best = h
+			}
+
 		}
 	}
+
 	// either extend a Cards column OR Free (if any open)
 	if best.score == 60 && freeCellCount(gs) > 0 {
 		common.StringSet(hintReason, HintMap[200])
@@ -91,7 +99,6 @@ func generateLegalMoves(gs *GameState) []Move {
 				})
 			}
 		}
-
 		// sequences
 		seq := gs.findSequence(colIx)
 		if len(seq) > 1 {
@@ -107,6 +114,7 @@ func generateLegalMoves(gs *GameState) []Move {
 			}
 		}
 	}
+
 	// Free  → Cards or Foundation
 	for _, cell := range gs.FreeCells {
 		if cell != nil {
@@ -143,12 +151,18 @@ func generateLegalMoves(gs *GameState) []Move {
 
 func scoreMove(gs *GameState, mv Move) int {
 
-	// test using the top card of the "sequence" - may be length==1
+	// test using the top card of the "sequence" - may be length=1
 	top := mv.seq[len(mv.seq)-1]
 	item := getCellItem(gs, top.location(), top.column(), top.index())
 	card := item.card
+	if card.Icon == EmptyCardIcon {
+		return 0
+	}
 	toLoc := mv.dest.location()
 	fromLoc := mv.src.location()
+	if Ctx.debug {
+		fmt.Printf("scoreMove: card %s - from %s, to %s", card.Icon, mv.src, mv.dest)
+	}
 
 	// ace → foundation
 	if card.Rank == 1 && toLoc == Foundation {
@@ -186,7 +200,27 @@ func scoreMove(gs *GameState, mv Move) int {
 		if card.Rank+1 != d.Rank {
 			return 0
 		}
-		return 60
+		// score 60 if the source card is part of a real chain
+		srcCol := gs.CardCells[mv.src.column()]
+		srcIdx := mv.src.index()
+		// check if the card is the top of the maximal chain
+		isChainTop := true
+		if srcIdx > 0 {
+			prev := srcCol[srcIdx-1].card
+			if isRed(prev.Suit) != isRed(card.Suit) && prev.Rank == card.Rank+1 {
+				// there is a card above that continues the chain
+				isChainTop = false
+			}
+		}
+
+		if isChainTop {
+			return 60
+		}
+
+		return 20
+
+		return 20
+		//return 60
 	}
 	// would free a column
 	if fromLoc == Cards && len(gs.CardCells[mv.src.column()]) == 1 {
@@ -195,10 +229,6 @@ func scoreMove(gs *GameState, mv Move) int {
 	// King → empty column
 	if card.Rank == 13 && toLoc == Empty {
 		return 40 // King-> empty column
-	}
-	// safe Cards move
-	if toLoc == Cards {
-		return 20
 	}
 	// move to free cell
 	if toLoc == Free && freeCellCount(gs) > 1 {
@@ -209,7 +239,7 @@ func scoreMove(gs *GameState, mv Move) int {
 }
 
 func (gs *GameState) foundationHasRank(suit common.Suit, rank int) bool {
-	top := gs.FoundationCells[int(suit)]
+	top := gs.FoundationCells[suit]
 	if top == nil {
 		return false
 	}
@@ -239,7 +269,7 @@ func (gs *GameState) isSafeFoundationMove(card common.Card) bool {
 }
 
 func (gs *GameState) foundationRank(suit common.Suit) int {
-	top := gs.FoundationCells[int(suit)]
+	top := gs.FoundationCells[suit]
 	if top == nil {
 		return 0
 	}

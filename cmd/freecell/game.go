@@ -2,8 +2,6 @@ package main
 
 import (
 	"cards/common"
-
-	"fyne.io/fyne/v2"
 )
 
 /*
@@ -168,25 +166,6 @@ var (
 	geometry  Geometry // recomputed on every mouse movement
 	undos     []Move   // a single Move for undo-ing
 )
-
-// return the CellItem that the mouse is "inside"
-func findCellItem(mouse fyne.Position) CellItemId {
-	for col := 0; col < 4; col++ {
-		if isInside(geometry.FreeGrid[col], mouse) {
-			return NewCellItemId(Free, col, 0)
-		}
-		if isInside(geometry.FoundationGrid[col], mouse) {
-			return NewCellItemId(Foundation, col, 0)
-		}
-	}
-	for col := 0; col < 8; col++ {
-		ix := cardAt(geometry.CardGrids[col], mouse)
-		if ix >= 0 {
-			return NewCellItemId(Cards, col, ix)
-		}
-	}
-	return NewCellItemId(Empty, 0, 0)
-}
 
 func getCellItem(gs *GameState, loc Location, col, idx int) *CellItem {
 	switch loc {

@@ -32,6 +32,8 @@ go build -v -trimpath -ldflags="-s -w -H=windowsgui" -o cmd/freecell/freecell.ex
 
 in games/cmd/freecell:
 fyne bundle -o splash.go --package main splash.png
+fyne bundle -o splash.go -a freecell.txt
+
 
 
 in games/cmd/freecell:
@@ -82,7 +84,6 @@ func main() {
 		fyne.Do(func() {
 			splash.RemoveAll()
 			splash.Add(content)
-			//mainWindow.Resize(fyne.NewSize(800, 500))
 			splash.Refresh()
 		})
 	}()

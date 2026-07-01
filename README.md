@@ -9,6 +9,7 @@ This project includes six single‑player card games:
 - **Bridge** – South is the bidder and declarer; North is partner; East/West are AI defenders.
 - **Rummy** – Single‑player Gin/Rummy with an AI opponent.
 - **Cribbage** – Single‑player Cribbage with an AI opponent.
+- **Freecell** - Freecell Solitaire.
 
 
 All functions are covered by a MIT license and free for use.
@@ -201,7 +202,7 @@ Deadwood count determines knock and gin outcomes.
 
 ### ♠ ♣ ♥ ♦  —  ♠ ♣ ♥ ♦
 
-## 6. (Cribbage) Single Player vs AI Cribbage
+## 7. (Cribbage) Single Player vs AI Cribbage
 
 A single‑player Cribbage variant.
 The PLAYER is the logged-in user.
@@ -249,6 +250,56 @@ For each hand:
 - His Nobs (a Jack matching starter suit)
 
 
+
+### ♠ ♣ ♥ ♦  —  ♠ ♣ ♥ ♦
+
+## 8. (Freecell) Patience / Solitaire
+
+A single‑player Freecell game.
+Objective is to gather consecutive cards from Ace to King of the same suit.
+The board consists of three areas - Card Columns, Free, and Foundation.
+- Card Columns (8 card columns) are all of the cards not in the Free or Foundation areas.
+- The Free area (4 cells) is a temporary "parking" spot to free up buried
+cards in the Card Columns.
+- The Foundation piles (4 suits - ♣,♦,♥,♠, each in ascending rank).
+The game is "won" when all 4 suits are complete.
+
+A "sequence" is 1 or more cards in descending rank and alternating colors -
+clubs and spades are black, diamonds and hearts are red.
+
+
+### Gameplay
+
+- Clicking the "DEAL" button presents a new board.
+- All 52 cards are dealt face up. 7 in the first 4 columns and 6 in the last 4 columns.
+- Clicking the "UNDO" button reverses the last valid move.
+- Setting the "Hints" to "on" provides a useful hint for the next move.
+- Cards are moved via drag-and-drop:
+
+Move the mouse to the card to select a card or sequence.
+Pressing the Primary mouse button selects the cell.
+Selecting the first of a sequence selects the entire sequence.
+
+Moving the mouse while holding the button down drags the card's icon (i.e. 10♠).
+
+While moving, any valid destination cell is highlighted and any invalid destination
+ is dimmed. Locations outside cards are not shown.
+
+Releasing the mouse button ends the move. If it is in a valid location, the card(s)
+ are removed from the original location and placed on the destination.
+
+**Specific Rules:**
+- Card Columns must be built with descending rank and alternating colors.
+- Foundations are built ascending by suit.
+- Any Free card or top card of any card column may be moved to
+  build on another column, moved to an empty Free card, or its Foundation.
+- Any sequence from a card column may be moved to another card column whose top has a rank
+one greater and opposite color as the rank/color of that sequence.
+- Only a single card may be moved from the top of a Card Column to an
+empty Free or Foundation cell.
+- Only a King (or King sequence) may be placed on an empty Card Column.
+
+
 --------------------------------------------------------------
 
 ## Tech Stuff
@@ -271,12 +322,16 @@ Shared components:
 Everything else — rules, payouts, UI, and state machines —
 are isolated per application.
 
+Drag-and-Drop is implemented using a full container overlay for tracking
+ and animation.
+Card image high-lighting is achieved via gray/yellow rectangle overlays.
+
 Each app has the same structure:
 - XXXX.go - the main program.
 - prefs.go - optional and manually configurable parameters.
 - ui.go - the user interface (fyne.io).
 - game.go - the games' physical engine.
-- evaluate.go - compute the resolution of a deal.
+- evaluate.go - compute the resolutions of a situation.
 - splash.png and splash.go -- image resource files.
 
 Application configuration files ("preferences.json") are located in the
@@ -295,6 +350,7 @@ Where:
 - com.scsi.bridge
 - com.scsi.rummy
 - com.scsi.cribbage
+- com.scsi.freecell
 
 
 ---

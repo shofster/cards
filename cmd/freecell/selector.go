@@ -3,6 +3,7 @@ package main
 import (
 	"cards/common"
 	"fmt"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -20,7 +21,7 @@ import (
 
 */
 /*
-  Description:
+  Description: Follow the mouse - select source, destination - move cards.
 */
 
 type InteractionPhase int
@@ -32,9 +33,9 @@ const (
 
 type Interaction struct {
 	Phase       InteractionPhase
-	SourceCell  CellItemId // where mouseDown happened
-	HoverCell   CellItemId // cell currently under mouse
-	InvalidCell CellItemId
+	SourceCell  CellItemId   // where mouseDown happened
+	HoverCell   CellItemId   // cell currently under mouse
+	InvalidCell CellItemId   // a hovered cell that is invalid for destination
 	Seq         []CellItemId // selected sequence (1 or more cards)
 	DragCard    *common.Card // card shown next to cursor
 }
@@ -57,6 +58,8 @@ func mouseClick(down bool, ev *desktop.MouseEvent) {
 	}
 }
 
+// recompute the UI geometry
+// and place the mouse pointer into a valid UI element
 func mousePosition(mp fyne.Position) {
 	common.IntSet(mouseX, int(mp.X))
 	common.IntSet(mouseY, int(mp.Y))
@@ -64,12 +67,13 @@ func mousePosition(mp fyne.Position) {
 	mouseCell = findCellItem(mp)
 }
 
+// called on every mouse movement.
 func mouseMove(ev *desktop.MouseEvent) {
 	if ev == nil {
 		return
 	}
 
-	// remember old cell BEFORE updating
+	// for same cell test
 	oldCell := mouseCell
 
 	// update geometry + mouseCell and cursor
@@ -97,7 +101,7 @@ func mouseMove(ev *desktop.MouseEvent) {
 			ci.SetHighlite(false)
 		}
 	}
-	if interaction.InvalidCell != 0 {
+	if interaction.InvalidCell != 0 { // and invalid
 		if ci := cardImageFromCellId(interaction.InvalidCell); ci != nil {
 			ci.SetDim(false)
 		}
@@ -106,12 +110,10 @@ func mouseMove(ev *desktop.MouseEvent) {
 
 	// update hover cell
 	interaction.HoverCell = mouseCell
-
 	// ignore source cell
 	if mouseCell == interaction.SourceCell {
 		return
 	}
-
 	// nothing under mouse
 	if mouseCell == 0 {
 		return
@@ -129,7 +131,7 @@ func mouseMove(ev *desktop.MouseEvent) {
 		}
 	}
 
-	// cursor image follows the mouse
+	// follow the mouse with the card Icon
 	cursor.Move(ev.AbsolutePosition)
 }
 
@@ -143,21 +145,49 @@ func mouseDown(mp fyne.Position) {
 		cursor.Show(false)
 		return
 	}
+
+	var invalidDown = func() {
+		interaction.InvalidCell = mouseCell
+		if ci := cardImageFromCellId(mouseCell); ci != nil {
+			ci.SetDim(true)
+		}
+		return
+	}
+
+	// might be invalid - let me count the ways
 	card := cardFromCellId(mouseCell)
-	icon := card.Icon
-	common.StringSet(cursor.cursorCard, fmt.Sprintf(".  %s", icon))
-	common.StringSet(mouseIcon, fmt.Sprintf("%3s", icon))
+
+	if Ctx.debug {
+		if card == nil { // empty column
+			fmt.Printf("mouseDown: card is nil\n")
+		} else { // empty Free or Foundation
+			fmt.Printf("mouseDown: cell %s %s \n", mouseCell, card.Icon)
+		}
+	}
+	if card == nil { // Cards
+		invalidDown()
+		return
+	} else {
+		icon := card.Icon // may still be Empty
+		if mouseCell.location() == Empty || icon == EmptyCardIcon {
+			invalidDown()
+			return
+		}
+		common.StringSet(cursor.cursorCard, fmt.Sprintf(".  %s", icon))
+		common.StringSet(mouseIcon, fmt.Sprintf("%3s", icon))
+	}
+
 	cursor.Move(mp)
 	cursor.Show(true)
 	interaction = Interaction{}
 
-	// build the movable sequence starting at this cell
+	// build the movable sequence starting on this cell
 	seq, ok := findMovableSequence(&gameState, mouseCell)
 	if !ok {
 		interaction = Interaction{}
 		return
 	}
-	// Begin interaction
+	// Begin mouse interaction
 	interaction.Phase = MouseDown
 	interaction.SourceCell = mouseCell
 	interaction.HoverCell = mouseCell
@@ -228,7 +258,7 @@ func performMove(gs *GameState, seq []CellItemId, src CellItemId, dest CellItemI
 
 	s := getCellItem(gs, sl, sc, si)
 	if Ctx.debug {
-		fmt.Printf("performMove: src= %s (%s), dest=%s\n",
+		log.Printf("performMove: src= %s (%s), dest=%s\n",
 			src, s.card.Icon, dest)
 	}
 
@@ -238,11 +268,9 @@ func performMove(gs *GameState, seq []CellItemId, src CellItemId, dest CellItemI
 	case Free:
 		moving = []*CellItem{gs.FreeCells[sc]}
 		gs.FreeCells[sc] = NewCellItem(Free, sc, 0, emptyCard())
-
 	case Foundation:
 		moving = []*CellItem{gs.FoundationCells[sc]}
 		gs.FoundationCells[sc] = NewCellItem(Foundation, sc, 0, emptyCard())
-
 	case Cards:
 		col := gs.CardCells[sc]
 
@@ -274,6 +302,7 @@ func performMove(gs *GameState, seq []CellItemId, src CellItemId, dest CellItemI
 		}
 
 		gs.CardCells[sc] = newCol
+	default:
 	}
 
 	switch dl {
@@ -282,7 +311,6 @@ func performMove(gs *GameState, seq []CellItemId, src CellItemId, dest CellItemI
 		card := moving[0].card
 		gs.FreeCells[dc] = NewCellItem(Free, dc, 0, card)
 		updateFreeCell(dc, gs)
-
 	case Foundation:
 		// build a fresh CellItem for the Foundation
 		card := moving[0].card
@@ -295,9 +323,10 @@ func performMove(gs *GameState, seq []CellItemId, src CellItemId, dest CellItemI
 			ci.id = NewCellItemId(Cards, dc, base+i)
 		}
 		gs.CardCells[dc] = append(gs.CardCells[dc], moving...)
+	default:
 	}
 
-	// ? add current move to undos
+	// ? - add current move to undos
 	if !isRedo {
 		pushUndo(Move{
 			src:  src,
@@ -335,6 +364,7 @@ func cardImageFromCellId(ci CellItemId) *common.CardImage {
 			return foundationGrid.Objects[c].(*common.CardImage)
 		case Cards:
 			return cardStacks[c].Objects[x].(*common.CardImage)
+		default:
 		}
 	}
 	return nil
@@ -352,6 +382,7 @@ func cardFromCellId(ci CellItemId) *common.Card {
 			if len(gameState.CardCells[c]) > 0 {
 				return &gameState.CardCells[c][x].card
 			}
+		default:
 		}
 	}
 	return nil
@@ -407,7 +438,26 @@ func clearSequenceHighlight(seq []CellItemId) {
 	}
 }
 
-// tracking echo - used for testing only
+// return the CellItem that the mouse is "inside"
+func findCellItem(mouse fyne.Position) CellItemId {
+	for col := 0; col < 4; col++ {
+		if isInside(geometry.FreeGrid[col], mouse) {
+			return NewCellItemId(Free, col, 0)
+		}
+		if isInside(geometry.FoundationGrid[col], mouse) {
+			return NewCellItemId(Foundation, col, 0)
+		}
+	}
+	for col := 0; col < 8; col++ {
+		ix := cardAt(geometry.CardGrids[col], mouse)
+		if ix >= 0 {
+			return NewCellItemId(Cards, col, ix)
+		}
+	}
+	return NewCellItemId(Empty, 0, 0)
+}
+
+// tracking echo - used for original testing only
 func trackMouse(ev *desktop.MouseEvent) {
 	if ev == nil {
 		common.StringSet(mouseIcon, "   ")
@@ -431,6 +481,7 @@ func trackMouse(ev *desktop.MouseEvent) {
 
 /*
 
+to add keyboard - someday
 
 1. Arrow keys move a “focus rectangle”
 Up/down moves within a column

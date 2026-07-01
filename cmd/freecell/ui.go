@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -26,7 +27,7 @@ import (
 
 */
 /*
-  Description:
+  Description: UI construction.
 */
 
 var (
@@ -59,7 +60,6 @@ func makeGreenPanel(content *fyne.Container) *fyne.Container {
 	// Casino - color.NRGBA{0, 128, 0, 255}
 	bg := canvas.NewRectangle(color.NRGBA{20, 180, 20, 50})
 	return container.NewStack(bg, content)
-	//return content
 }
 
 // build the widgets for the actual game.
@@ -78,6 +78,16 @@ func initGameUI() *fyne.Container {
 		popUndo()
 	})
 	undoButton.Disable()
+
+	content := string(resourceFreecellTxt.StaticContent)
+	lbl := widget.NewLabel(content)
+	lbl.Wrapping = fyne.TextWrapWord
+	scroll := container.NewScroll(lbl)
+	scroll.SetMinSize(fyne.NewSize(500, 400))
+	helpButton := widget.NewButton("HELP", func() {
+		dialog.ShowCustom("Freecell Help", "Close", scroll, Ctx.mainWindow)
+	})
+	helpButton.Enable()
 
 	var col int
 	for col = 0; col < 4; col++ {
@@ -152,19 +162,11 @@ func initGameUI() *fyne.Container {
 	common.StringSet(hintReason, HintMap[0])
 	hintText := widget.NewLabelWithData(hintReason)
 	hintInfo := container.NewHBox(widget.NewLabel("Hints?"), hintGroup, hintText)
-	//hintOnOff.AddListener(binding.NewDataListener(func() {
-	//	if common.BoolGet(hintOnOff) {
-	//		hintx.Selected = "on"
-	//		common.StringSet(hintReason, HintMap[1])
-	//	} else {
-	//		hintx.Selected = "off"
-	//		common.StringSet(hintReason, HintMap[0])
-	//	}
-	//}))
 
 	controlBar := container.NewHBox()
 	controlBar.Add(dealButton)
 	controlBar.Add(undoButton)
+	controlBar.Add(helpButton)
 	controlBar.Add(layout.NewSpacer())
 	controlBar.Add(hintInfo)
 	controlBar.Add(mouseInfo)

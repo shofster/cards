@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"fyne.io/fyne/v2"
 )
@@ -56,7 +56,7 @@ func buildGeometry() {
 		obj := cardsGrid.Objects[i]
 		column, ok := obj.(*fyne.Container)
 		if !ok {
-			fmt.Println("ERROR: cardsGrid.Objects[", i, "] is not a container:", obj)
+			log.Println("ERROR: cardsGrid.Objects[", i, "] is not a container:", obj)
 			continue
 		}
 		if len(column.Objects) == 0 {

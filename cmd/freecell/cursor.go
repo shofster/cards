@@ -23,12 +23,9 @@ import (
 
 */
 /*
-  Description:
+  Description: moveable "cursor" - a Card.Icon as Red or Black based on Card.Suit
 */
 
-/*
-moveable "cursor" - a Card.Icon as Red or Black based on Card.Suit
-*/
 type Cursor struct {
 	cursorCard binding.String
 	obj        canvas.Text
@@ -36,6 +33,7 @@ type Cursor struct {
 	show       bool
 }
 
+// text color of the card
 var ColorRed = color.NRGBA{255, 0, 0, 255}
 var ColorBlack = color.NRGBA{00, 00, 00, 255}
 
@@ -47,7 +45,7 @@ func NewCursor() *Cursor {
 	c.obj = canvas.Text{
 		Alignment: 0,
 		Color:     ColorBlack,
-		Text:      "A♠",
+		Text:      "A♠", // example - set to the card to track's position
 		TextSize:  float32(Ctx.dragSize),
 		TextStyle: fyne.TextStyle{
 			Bold:      true,

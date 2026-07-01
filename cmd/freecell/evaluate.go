@@ -2,7 +2,7 @@ package main
 
 import (
 	"cards/common"
-	"fmt"
+	"log"
 )
 
 /*
@@ -17,38 +17,8 @@ import (
 
 */
 /*
-  Description:
+  Description: various move validation functions.
 */
-
-const ReasonNoLegal = 0
-
-const HintMoveSafeFoundation = 10
-const HintMoveAceFoundation = 11
-const HintMoveTwoFoundation = 12
-
-const HintMoveSafeCardColumn = 20
-const HintFreeCardColumn = 21
-const HintKingCardColumn = 22
-
-const HintEnableSeq = 30
-const HintExtendAltSeq = 31
-const HintParkFreeCell = 32
-
-const HintMoveLowValue = 40
-
-var Hints = map[int]string{
-	ReasonNoLegal:          "No available legal move",
-	HintMoveSafeFoundation: "Safe foundation move",
-	HintMoveAceFoundation:  "Move Ace dest foundation",
-	HintMoveTwoFoundation:  "Move Two dest foundation",
-	HintMoveSafeCardColumn: "Safe Card Column move",
-	HintFreeCardColumn:     "Free a card column",
-	HintKingCardColumn:     "Place King in empty card column",
-	HintEnableSeq:          "Move enables sequence",
-	HintExtendAltSeq:       "Extend descending alternating sequence",
-	HintParkFreeCell:       "Park in free cell",
-	HintMoveLowValue:       "Low-value move",
-}
 
 func isValidSequence(gs *GameState, src *CellItem, seqLen int) bool {
 	loc, col, idx := decodeCellItemId(src.id)
@@ -105,21 +75,19 @@ func canMoveSequence(gs *GameState, seq []CellItemId, dest CellItemId) bool {
 
 	switch dl { // destination
 	case Free:
-		// single cards to free
+		// only single cards to free
 		if len(seq) != 1 {
 			return false
 		}
 		return canMoveToFree(gs, gs.FreeCells[dc])
-
 	case Foundation:
 		// single cards to foundation
 		if len(seq) != 1 {
 			return false
 		}
 		return canMoveToFoundation(gs, srcItem, dest)
-
 	case Cards:
-		// multi-card sequence to cards
+		// one or multi-card sequence to cards
 		return canMoveSequenceToCards(gs, srcItem, dc, len(seq))
 	}
 
@@ -145,10 +113,9 @@ func canMoveToFoundation(gs *GameState, src *CellItem, dest CellItemId) (r bool)
 		r = src.card.Rank == top.card.Rank+1
 	}
 	if Ctx.debug {
-		fmt.Printf("canMoveToFoundation: src= %s (%s), top=%s [%t]\n",
+		log.Printf("canMoveToFoundation: src= %s (%s), top=%s [%t]\n",
 			src.id, src.card.Icon, top.card.Icon, r)
 	}
-
 	return
 }
 
@@ -156,7 +123,7 @@ func canMoveToFoundation(gs *GameState, src *CellItem, dest CellItemId) (r bool)
 func canMoveToCards(gs *GameState, src *CellItem, column int) bool {
 
 	if Ctx.debug {
-		fmt.Printf("canMoveToCards: src= %s (%s) cardColumn %d\n",
+		log.Printf("canMoveToCards: src= %s (%s) cardColumn %d\n",
 			src.id, src.card.Icon, column)
 	}
 
@@ -174,16 +141,14 @@ func canMoveToCards(gs *GameState, src *CellItem, column int) bool {
 
 func canMoveSequenceToCards(gs *GameState, src *CellItem, column int, seqLen int) bool {
 	col := gs.CardCells[column]
-	if len(col) == 0 { // catch moving a King.. sequence - only the King is OK
-		return seqLen == 1 && src.card.Rank == common.King
+	if len(col) == 0 { //  only the King is OK
+		return src.card.Rank == common.King
 	}
 	if !isValidSequence(gs, src, seqLen) {
 		return false
 	}
 	return canMoveToCards(gs, src, column)
 }
-
-//  ---------------------------------------  //
 
 func isEmptyCard(ci *CellItem) bool {
 	return ci.card.Icon == EmptyCardIcon
@@ -199,25 +164,3 @@ func freeCellCount(gs *GameState) int {
 	}
 	return n
 }
-
-/*  MICROSOFT rule - NOT NEEDED / WANTED in this version
-
-in func canMoveSequenceToCards
-
-	// can only move if room for each card to be moved
-	// individually (to Free or Cards)
-	if seqLen > moveableCellCount(gs) {
-		return false
-	}
-
-
-// count of places to move - dumb rule :-)
-// can only move if room for each card to be moved
-// individually (to Free or Cards)
-func moveableCellCount(gs *GameState) int {
-	free := freeCellCount(gs)
-	emptyCardCols := emptyCardsCount(gs)
-	return (free + 1) * (1 << emptyCardCols)
-}
-
-*/

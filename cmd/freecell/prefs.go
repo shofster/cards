@@ -20,7 +20,7 @@ import (
 
 */
 /*
-  Description:
+  Description: preferences and global variables.
 */
 
 type Global struct {
