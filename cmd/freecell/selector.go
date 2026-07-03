@@ -169,7 +169,8 @@ func mouseDown(mp fyne.Position) {
 		return
 	} else {
 		icon := card.Icon // may still be Empty
-		if mouseCell.location() == Empty || icon == EmptyCardIcon {
+		if mouseCell.location() == Empty || icon == EmptyCardIcon ||
+			mouseCell.location() == Foundation {
 			invalidDown()
 			return
 		}
@@ -328,11 +329,23 @@ func performMove(gs *GameState, seq []CellItemId, src CellItemId, dest CellItemI
 
 	// ? - add current move to undos
 	if !isRedo {
-		pushUndo(Move{
-			src:  src,
-			dest: dest,
-			seq:  append([]CellItemId(nil), seq...), // append all the CardItems
-		})
+		// skip undo for moves INTO Foundation
+		sl, _, _ := decodeCellItemId(dest)
+		if sl == Foundation {
+			// disable button
+			undoButton.Disable()
+		} else {
+			// normal undo recording
+			undoSeq := make([]CellItemId, len(moving))
+			for i, ci := range moving {
+				undoSeq[i] = ci.id
+			}
+			pushUndo(Move{
+				src:  dest,
+				dest: src,
+				seq:  undoSeq,
+			})
+		}
 	}
 
 	common.IntSet(playCount, common.IntGet(playCount)+1)

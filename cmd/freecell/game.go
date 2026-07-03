@@ -141,10 +141,14 @@ func pushUndo(mv Move) {
 	undos = append(undos, mv)
 	undoButton.Enable()
 }
+
 func popUndo() {
 	mv := undos[0]
 	undos = nil
-	performMove(&gameState, mv.seq, mv.dest, mv.src, true)
+
+	// mv.src/mv.dest already set up for undo in performMove
+	performMove(&gameState, mv.seq, mv.src, mv.dest, true)
+
 	undoButton.Disable()
 }
 

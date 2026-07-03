@@ -6,12 +6,9 @@ ARCH="$2"
 # ------------------------------------------------------------
 # Usage / defaults
 # ------------------------------------------------------------
-[ -z "$APP" ] && { echo "Usage: ./games.sh <app|all> [amd|arm]"; exit 1; }
+[ -z "$APP" ] && { echo "Usage: ./games.sh <app|all>"; exit 1; }
 
-# Default ARCH = arm on macOS + Linux
-[ -z "$ARCH" ] && ARCH="arm"
-
-DIST="dist/$ARCH"
+DIST="dist"
 OS=$(uname)
 
 # ------------------------------------------------------------
@@ -39,7 +36,7 @@ cd - >/dev/null
 mkdir -p "$DIST"
 
 # ------------------------------------------------------------
-# macOS: .app + .dmg (chmod isn't needed - fyne sets)
+# macOS: .app + .dmg
 # ------------------------------------------------------------
 if [ "$OS" = "Darwin" ]; then
     if [ -d "cmd/$APP/$APP.app" ]; then

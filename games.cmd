@@ -5,16 +5,13 @@ rem -----------------------------------------
 rem Positional arguments
 rem -----------------------------------------
 set APP=%1
-set ARCH=%2
 
 if "%APP%"=="" (
-    echo Usage: make.cmd ^<app^|all^> ^<amd^|arm^>
+    echo Usage: make.cmd ^<app^|all>^>
     exit /b 1
 )
 
-if "%ARCH%"=="" set ARCH=amd
-
-set DIST=dist\%ARCH%
+set DIST=dist
 
 rem -----------------------------------------
 rem Build ALL apps
