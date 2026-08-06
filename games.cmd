@@ -39,7 +39,7 @@ echo.
 echo === Packaging %APP% for Windows/%ARCH% ===
 
 pushd cmd\%APP%
-fyne package --release --icon=splash.png --id=com.scsi.%APP%
+fyne package --release --id=com.scsi.%APP%
 popd
 
 if not exist %DIST% mkdir %DIST%

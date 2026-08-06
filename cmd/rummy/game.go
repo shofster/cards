@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2/canvas"
 )
 
+//go:generate fyne bundle -output splash.go -name resourceSplashPng Icon.png
+
 /*
 
   File:    game.go

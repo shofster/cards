@@ -8,6 +8,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+//go:generate fyne bundle -output splash.go -name resourceSplashPng Icon.png
+
 /*
 
   File:    game.go

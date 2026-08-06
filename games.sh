@@ -30,7 +30,7 @@ echo
 echo "=== Packaging $APP for $OS/$ARCH ==="
 
 cd "cmd/$APP" || { echo "ERROR: cmd/$APP not found"; exit 1; }
-fyne package --release --icon=splash.png --id="com.scsi.$APP"
+fyne package --release --id="com.scsi.$APP"
 cd - >/dev/null
 
 mkdir -p "$DIST"
