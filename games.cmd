@@ -33,7 +33,7 @@ goto :eof
 
 
 :package_app
-set APP=%1
+set APP=%~1
 
 echo.
 echo === Packaging %APP% for Windows/%ARCH% ===

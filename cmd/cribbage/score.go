@@ -26,7 +26,7 @@ import (
 var duration = time.Second * 1
 
 const defaultDuration = time.Second * 1
-const handScoreDuration = time.Second * 3
+const handScoreDuration = time.Second * 5
 
 func scorePoints(who, points int, reason string) {
 	if points > 0 {

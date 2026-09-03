@@ -2,7 +2,9 @@ package main
 
 import (
 	"cards/common"
+	"fmt"
 	"log"
+	"sort"
 )
 
 /*
@@ -82,12 +84,12 @@ func chooseDiscard(cards common.Cards, isDealer bool) (keep common.Cards, discar
 	bestScore := -1e9 // effectively -infinity
 
 	// Enumerate all 15 ways to choose 2 cards to discard
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		for j := i + 1; j < 6; j++ {
 
 			// Build keep (4 cards)
 			keepTmp := make(common.Cards, 0, 4)
-			for k := 0; k < 6; k++ {
+			for k := range 6 {
 				if k != i && k != j {
 					keepTmp = append(keepTmp, cards[k])
 				}
@@ -120,6 +122,9 @@ func chooseDiscard(cards common.Cards, isDealer bool) (keep common.Cards, discar
 // keep must contain exactly 4 cards.
 //
 //	used to determine discards after deal
+
+var logit bool
+
 func expectedHandScore(keep common.Cards) float64 {
 	total := 0
 	count := 0
@@ -133,7 +138,9 @@ func expectedHandScore(keep common.Cards) float64 {
 		}
 
 		// score the 5‑card hand
+		//logit = false
 		total += scoreHand(keep, starter)
+		//logit = true
 		count++
 	}
 
@@ -144,6 +151,13 @@ func expectedHandScore(keep common.Cards) float64 {
 func scoreHand(hand common.Cards, starter common.Card) int {
 	cards := append([]common.Card{}, hand...)
 	cards = append(cards, starter)
+
+	if logit {
+		fmt.Printf("scoreHand: starter %s", starter.Icon)
+		for _, c := range hand {
+			fmt.Printf(" %s,%d", c.Icon, runValue(c))
+		}
+	}
 
 	score := 0
 
@@ -157,8 +171,10 @@ func scoreHand(hand common.Cards, starter common.Card) int {
 	score += scoreRun
 	score += scoreFl
 	score += scoreNob
-	//fmt.Printf("15:%d, pair:%d, run:%d, flush:%d, nob:%d - total:%d\n",
-	//	score15, scorePair, scoreRun, scoreFl, scoreNob, score)
+	if logit {
+		fmt.Printf("\n15:%d, pair:%d, run:%d, flush:%d, nob:%d - total:%d\n",
+			score15, scorePair, scoreRun, scoreFl, scoreNob, score)
+	}
 
 	return score
 }
@@ -185,7 +201,7 @@ func score15s(cards common.Cards) int {
 	// All subsets except empty
 	for mask := 1; mask < (1 << n); mask++ {
 		sum := 0
-		for i := 0; i < n; i++ {
+		for i := range n {
 			if mask&(1<<i) != 0 {
 				sum += cribValue(cards[i]) // A=1, 2=2, ... 10/J/Q/K=10
 			}
@@ -195,6 +211,21 @@ func score15s(cards common.Cards) int {
 		}
 	}
 	return score
+}
+
+func runValue(c common.Card) int {
+	switch c.Rank {
+	case common.Ace:
+		return 1
+	case common.Jack:
+		return 11
+	case common.Queen:
+		return 12
+	case common.King:
+		return 13
+	default:
+		return int(c.Rank)
+	}
 }
 
 func cribValue(c common.Card) int {
@@ -210,7 +241,7 @@ func cribValue(c common.Card) int {
 
 func scorePairs(cards common.Cards) int {
 	score := 0
-	for i := 0; i < len(cards); i++ {
+	for i := range cards {
 		for j := i + 1; j < len(cards); j++ {
 			if cards[i].Rank == cards[j].Rank {
 				score += 2
@@ -229,8 +260,8 @@ func scoreRuns(cards common.Cards) int {
 	// Try all subsets of size 5,4,3
 	for size := 5; size >= 3; size-- {
 		count := 0
-		for _, subset := range common.SubsetsOf(cards, size) {
-			if common.IsRun(subset) {
+		for _, subset := range subsetsOf(cards, size) {
+			if isRun(subset) {
 				count++
 			}
 		}
@@ -265,6 +296,67 @@ func scoreNobs(hand common.Cards, starter common.Card) int {
 		}
 	}
 	return 0
+}
+
+func isRun(cards common.Cards) bool {
+	n := len(cards)
+	if n < 3 {
+		return false
+	}
+
+	ranks := make([]int, n)
+	for i, c := range cards {
+		ranks[i] = runValue(c)
+	}
+
+	sort.Ints(ranks)
+
+	for i := 1; i < n; i++ {
+		if ranks[i] != ranks[i-1]+1 {
+			return false
+		}
+	}
+	return true
+}
+
+func subsetsOf(cards common.Cards, k int) []common.Cards {
+	n := len(cards)
+	if k > n || k <= 0 {
+		return nil
+	}
+
+	// initial combination indices: [0,1,2,...,k-1]
+	idx := make([]int, k)
+	for i := range k {
+		idx[i] = i
+	}
+
+	out := make([]common.Cards, 0, 32)
+
+	for {
+		// build subset
+		subset := make(common.Cards, k)
+		for i := range k {
+			subset[i] = cards[idx[i]]
+		}
+		out = append(out, subset)
+
+		// generate next combination
+		i := k - 1
+		for i >= 0 && idx[i] == i+n-k {
+			i--
+		}
+		if i < 0 {
+			break
+		}
+
+		idx[i]++
+		for j := i + 1; j < k; j++ {
+			idx[j] = idx[j-1] + 1
+		}
+	}
+
+	return out
 }
 
 // cribBias returns a score for the two discarded cards.

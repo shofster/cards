@@ -441,15 +441,38 @@ func showCrib() {
 
 // show all hands
 func showAll() {
+
+	// show all the crib cards
 	for i := range 4 {
 		ci := cribStack.Objects[i].(*common.CardImage)
 		ci.Reset(crib[ci.ID].Resource)
 	}
+
+	// see if the PLAYER or AI card was put in the crib
+	var isCrib = func(icon string) bool {
+		for i := range 4 {
+			if crib[i].Icon == icon {
+				return true
+			}
+		}
+		return false
+	}
+	// show retained cards, hide the crib cards
 	for i := range 6 {
+
 		ci := playerStack.Objects[i].(*common.CardImage)
-		ci.Reset(hands[PLAYER][ci.ID].Resource)
+		if isCrib(hands[PLAYER][ci.ID].Icon) {
+			ci.Replace(Ctx.cardMap["reverse"].Resource)
+		} else {
+			ci.Reset(hands[PLAYER][ci.ID].Resource)
+		}
+
 		ci = aiStack.Objects[i].(*common.CardImage)
-		ci.Reset(hands[AI][ci.ID].Resource)
+		if isCrib(hands[AI][ci.ID].Icon) {
+			ci.Replace(Ctx.cardMap["reverse"].Resource)
+		} else {
+			ci.Reset(hands[AI][ci.ID].Resource)
+		}
 	}
 
 }
