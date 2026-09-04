@@ -96,8 +96,10 @@ func deal() {
 
 func play() {
 	common.StringSet(dealResult, "  Playing...")
-	g.leadPlayer = South
-	g.player = South
+	//g.leadPlayer = South
+	//g.player = South
+	g.leadPlayer = West
+	g.player = West
 	g.leadSuit = common.NoSuit
 	common.IntSet(contractsBid, common.IntGet(contractsBid)+1)
 	trickPlayer()
