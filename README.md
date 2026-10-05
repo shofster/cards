@@ -300,6 +300,52 @@ empty Free or Foundation cell.
 - Only a King (or King sequence) may be placed on an empty Card Column.
 
 
+
+### ♠ ♣ ♥ ♦  —  ♠ ♣ ♥ ♦
+
+## 9. (MAHJONG) A classic Asian game of tiles and melds
+
+A simple two‑player (PLAYER and AI) mahjong game using the
+ Japanese riichi tile set and rules.
+
+Riichi mahjong is the Japanese style of mahjong.  
+MAHJONG uses 4 standard 37‑tile Japanese sets — Man, Pin, Sou, Dora, Winds, and Dragons —
+  and omits Flowers and Seasons. 
+Players draw and discard tiles to form a complete hand made of melds and a pair,
+  and may take the other player’s discard if it completes a valid set.
+The simplified rules emphasize tile efficiency and straightforward play,
+  without bonus tiles or special replacement draws.
+
+This game uses the standard international mahjong rules
+ (Chinese/Japanese style). It does not use American NMJL rules
+ with the yearly card.
+
+This implementation emphasizes tile flow, meld visualization,
+and interactive turn sequencing.
+It does not include full riichi rules such as yaku, fu, dora indicator,
+riichi declarations, kans, dead‑wall handling, or scoring.
+
+The 2 players are NaiNai [奶奶] (paternal grandmother) – you,
+ and XiaoLong [小龙] (little dragon) – me.
+
+The winner is the first to form 4 melds and 1 pair.
+
+**Scoring:  [Chinese]**
+- Pair Pair [对子, duìzi]: 2 tiles of the same suit and rank. Only 1 allowed. 20 points.
+- Pon (Pung [刻子, kèzi]:  3 tiles of the same suit and rank. 40 points.
+- Kan (Kong [杠子, gàngzi]): 4 tiles of the same suit and rank. 80 points.
+- Chi (Chow [顺子, shùnzi]): 3 tiles of the same suit and consecutive rank. 30 points.
+
+Play consists of alternating turns - starting with NaiNai:
+1) Automatically take the opponent's discard to form a Meld and discard the hand
+ tiles that completes the Meld.
+2) If no discard, draw the next tile from the stock and choose a discard.
+3) If a discard but not a Meld member, draw the next tile from the stock and
+ choose whether to accept the discard or the draw. Then, choose a discard.
+
+Play continues until one player wins - and receives +20 bonus points added to their score.
+
+
 --------------------------------------------------------------
 
 ## Tech Stuff
