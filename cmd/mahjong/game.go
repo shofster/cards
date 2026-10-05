@@ -126,7 +126,9 @@ func deal() {
 
 // win if 4 melds and 1 pair
 func (p *player) checkWin() bool {
-	fmt.Printf("checkWin: (%d) pair %t count %d\n", p.id, p.hasPair, len(p.melds))
+	Logit(func() string {
+		return fmt.Sprintf("checkWin: (%d) pair %t count %d\n", p.id, p.hasPair, len(p.melds))
+	})
 	if !p.hasPair || len(p.melds) != 5 {
 		return false
 	}
@@ -148,15 +150,13 @@ const DISCARD_ID = -3
 func flowGrandma() bool {
 	var meld *Meld
 	var drawTile *Tile
-	var clicked func(id int)
-	fyne.Do(func() {
-		actionButton.SetText(fmt.Sprintf("Click for: %s %s", XiaoLong, Dragon))
-		actionButton.Disable()
-	})
+
+	initFlow(fmt.Sprintf("%s %s", Dragon, XiaoLong))
 	actionButton.OnTapped = func() {
 		common.StringSet(turnState, AI)
 	}
 
+	var clicked func(id int)
 	clicked = func(id int) {
 		enableStock(false, nil)
 		enableTake(false, nil)
@@ -242,10 +242,8 @@ func flowGrandma() bool {
 }
 
 func flowDragon() bool {
-	fyne.Do(func() {
-		actionButton.SetText(fmt.Sprintf("Click for: %s %s", Grandma, NaiNai))
-		actionButton.Disable()
-	})
+
+	initFlow(fmt.Sprintf("%s %s", Grandma, NaiNai))
 	actionButton.OnTapped = func() {
 		common.StringSet(turnState, PLAYER)
 	}
@@ -269,6 +267,7 @@ func flowDragon() bool {
 		return p.tiles[id]
 
 	}
+
 	var dragonDrawDiscard = func() bool {
 		if tile := stockDraw(); tile != nil {
 			id := selectDiscard()
@@ -278,6 +277,7 @@ func flowDragon() bool {
 		}
 		return false
 	}
+
 	if take := players[PLAYER].takeDiscard(); take != nil {
 		// if meld: add to melds and remove & blank melded tiles
 		take.ID = -1 // mark the taken Tile
@@ -319,10 +319,22 @@ func toast(s string) {
 	toastWithDuration(s, duration)
 }
 func toastWithDuration(s string, d time.Duration) {
-	common.Toast(Ctx.mainWindow.Canvas(), fyne.NewPos(0, 0), s, common.InfoColor, d)
+	common.Toast(Ctx.mainWindow.Canvas(), fyne.NewPos(5, 5), s, common.InfoColor, d)
 }
 
-// /ai's random choice
+func initFlow(who string) {
+	var ops = make([]func(), 0)
+	ops = append(ops, func() {
+		actionButton.SetText(fmt.Sprintf("Click for: %s", who))
+	})
+	ops = append(ops, func() {
+		actionButton.Disable()
+	})
+	doWait(&ops, true)
+
+}
+
+// ai's random choice
 func (p *player) selectDiscard() *Tile {
 	var candidates []int
 	for _, t := range p.tiles {

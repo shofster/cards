@@ -36,6 +36,8 @@ var FailColor = color.NRGBA{R: 0x7f}
 func Toast(can fyne.Canvas, pos fyne.Position, txt string, c color.NRGBA, d time.Duration) {
 
 	rect := canvas.NewRectangle(BackGroundColor)
+	rect.StrokeWidth = 0
+	rect.CornerRadius = 6
 	txt = fmt.Sprintf("  %s  ", txt)
 
 	sc := c     // start color
@@ -44,6 +46,7 @@ func Toast(can fyne.Canvas, pos fyne.Position, txt string, c color.NRGBA, d time
 	ec.A = 0xff
 	t := canvas.NewText(txt, sc)
 	t.TextStyle.Bold = true
+	box := container.NewPadded(t)
 	a := canvas.NewColorRGBAAnimation(sc, ec, d,
 		func(c color.Color) {
 			t.Color = c
@@ -64,7 +67,7 @@ func Toast(can fyne.Canvas, pos fyne.Position, txt string, c color.NRGBA, d time
 	}
 
 	go func() {
-		pop := widget.NewPopUp(container.NewWithoutLayout(rect, t), can)
+		pop := widget.NewPopUp(container.NewWithoutLayout(rect, box), can)
 		pop.ShowAtPosition(pos)
 		a.Start()
 		pop.Show()

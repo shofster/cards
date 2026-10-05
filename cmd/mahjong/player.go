@@ -181,9 +181,11 @@ func (p *player) takeDiscard() *Tile {
 
 // discard Tile[id] and set Tile and its image to empty
 func (p *player) discard(tile *Tile) {
+	var ops = make([]func(), 0)
 	defer fyne.Do(func() {
-		p.discardTileContainer.Refresh()
-		p.historyContainer.Refresh()
+		ops = append(ops, func() { p.discardTileContainer.Refresh() })
+		ops = append(ops, func() { p.historyContainer.Refresh() })
+		doWait(&ops, false)
 	})
 	//discard := p.tiles[id] // the Tile to trash
 	p.discardTile = tile
@@ -192,8 +194,8 @@ func (p *player) discard(tile *Tile) {
 			"discard (%d) tile %s from slot %d \n", p.id, tile.Code, tile.ID)
 	})
 	dc := p.discardTileContainer.Objects[0].(*common.CardImage)
-	dc.SetDim(false)
-	dc.Replace(getTileResource(tile.Code))
+	ops = append(ops, func() { dc.SetDim(false) })
+	ops = append(ops, func() { dc.Replace(getTileResource(tile.Code)) })
 	// append to history , roll image
 	// the current discard tile is p.discards[len(p.discards)-1]
 	p.history = append(p.history, *tile)
@@ -202,7 +204,7 @@ func (p *player) discard(tile *Tile) {
 	if n <= maxHistory { // does not include spacer
 		ci := p.historyContainer.Objects[n].(*common.CardImage)
 		ci.ID = tile.ID
-		ci.Replace(getTileResource(tile.Code))
+		ops = append(ops, func() { ci.Replace(getTileResource(tile.Code)) })
 	} else { // shift the images left 1 spot
 		Logit(func() string {
 			return fmt.Sprintf("discard (%d) n is %d", p.id, n)
@@ -212,13 +214,13 @@ func (p *player) discard(tile *Tile) {
 			src := p.historyContainer.Objects[i+1].(*common.CardImage)
 			dst.ID = src.ID
 			dst.Img.Resource = src.Img.Resource
-			dst.Img.Refresh()
+			ops = append(ops, func() { dst.Img.Refresh() })
 		}
 		// fill the last slot
 		Logit(func() string { return fmt.Sprintf(" fill %d\n", maxHistory) })
 		ci := p.historyContainer.Objects[maxHistory].(*common.CardImage)
 		ci.ID = tile.ID
-		ci.Replace(getTileResource(tile.Code))
+		ops = append(ops, func() { ci.Replace(getTileResource(tile.Code)) })
 	}
 	// repalce the hand's Tile and image
 	p.replaceHandTile(NewBlankTile(tile.ID))
@@ -234,9 +236,6 @@ func (p *player) insert(tile *Tile) {
 // replace the hand Tile and its image with the new Tile
 // reset any attributes
 func (p *player) replaceHandTile(tile *Tile) {
-	defer fyne.Do(func() {
-		p.tileContainer.Refresh()
-	})
 	if tile.Code != "blank" {
 		Logit(func() string {
 			return fmt.Sprintf("replaceHandTile (%d) slot %d tile: %s with %s\n",
@@ -244,6 +243,9 @@ func (p *player) replaceHandTile(tile *Tile) {
 				tile.Code)
 		})
 	}
+	defer fyne.Do(func() {
+		p.tileContainer.Refresh()
+	})
 	p.tiles[tile.ID] = tile
 	ci := p.tileContainer.Objects[tile.ID].(*common.CardImage)
 	ci.Replace(getTileResource(tile.Code))
@@ -255,9 +257,9 @@ func (p *player) replaceHandTile(tile *Tile) {
 // replace the hand tile that aremembers of the meld
 func (p *player) newMeld(meld *Meld) {
 	defer fyne.Do(func() {
-		p.tileContainer.Refresh()
 		p.meldContainer.Refresh()
 	})
+
 	// add meld to player's list
 	p.melds = append(p.melds, meld)
 	// add each tile image

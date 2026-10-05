@@ -169,16 +169,14 @@ func initGameUI() *fyne.Container {
 	}))
 	pl := container.NewHBox(widget.NewLabel("  "+XiaoLong), apl)
 
-	tl := container.NewHBox(widget.NewLabel("  Turn is: "),
+	tl := container.NewHBox(widget.NewLabel("Turn is: "),
 		widget.NewLabelWithData(turnState))
 
 	common.IntSet(playerScoreData, 0)
 	common.IntSet(aiScoreData, 0)
 
-	actionButton = widget.NewButtonWithIcon("DEAL ", theme.MediaPlayIcon(),
+	actionButton = widget.NewButtonWithIcon("DEAL", theme.MediaPlayIcon(),
 		func() {
-			actionButton.SetText("")
-			actionButton.Disable()
 			start()
 		})
 
@@ -193,7 +191,7 @@ func initGameUI() *fyne.Container {
 	control := container.NewHBox(container.NewHBox(ps, pl),
 		layout.NewSpacer(), container.NewHBox(windSlot, tl, spacer,
 			actionButton),
-		layout.NewSpacer(), widget.NewLabel("    Stock: "), stockSlot, layout.NewSpacer())
+		layout.NewSpacer(), widget.NewLabel("      Stock:"), stockSlot, widget.NewLabel(" "))
 	scroll := container.NewScroll(
 		container.NewGridWithRows(2, playerPanel, aiPanel))
 	scroll.Direction = fyne.ScrollHorizontalOnly
@@ -218,17 +216,13 @@ func initGameUI() *fyne.Container {
 		case AI:
 			go flowDragon()
 		case "won":
-			fyne.Do(func() {
-				actionButton.SetText("GAME OVER")
-				actionButton.Disable()
-			})
+			actionButton.SetText("GAME OVER")
+			actionButton.Disable()
 			dialog.ShowInformation("WINNER",
 				fmt.Sprintf("%s\n%s\n", winner, showScores()), Ctx.mainWindow)
 		case "end":
-			fyne.Do(func() {
-				actionButton.SetText("GAME OVER")
-				actionButton.Disable()
-			})
+			actionButton.SetText("GAME OVER")
+			actionButton.Disable()
 			dialog.ShowInformation("STOCK EXHAUSTED", showScores(), Ctx.mainWindow)
 		}
 

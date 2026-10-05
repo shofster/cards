@@ -44,7 +44,7 @@ func enableStock(b bool, cb func(int)) {
 }
 
 func hiliteStock(b bool) {
-	defer fyne.Do(func() {
+	defer fyne.DoAndWait(func() {
 		stockSlot.Refresh()
 	})
 	si := stockSlot.Objects[0].(*common.CardImage)
