@@ -15,6 +15,9 @@ import "fyne.io/fyne/v2"
 */
 /*
   Description:
+
+fyne bundle -o cards.go --package assets ByronKnollCards
+
 */
 
 var ResourceByCode = map[string]fyne.Resource{
