@@ -57,13 +57,13 @@ func initGame() {
 	players[PLAYER] = &player{
 		id:      0, // for discard slot
 		tiles:   make([]*Tile, 0),
-		melds:   make([]*Meld, 0),
+		melds:   make(Melds, 0),
 		history: make([]Tile, 0),
 	}
 	players[AI] = &player{
 		id:      1,
 		tiles:   make([]*Tile, 0),
-		melds:   make([]*Meld, 0),
+		melds:   make(Melds, 0),
 		history: make([]Tile, 0),
 	}
 
@@ -145,8 +145,6 @@ func (p *player) checkWin() bool {
 	return pairs == 1 && melds == 4
 }
 
-const DISCARD_ID = -3
-
 func flowGrandma() bool {
 	var meld *Meld
 	var drawTile *Tile
@@ -163,7 +161,7 @@ func flowGrandma() bool {
 		enablePlayerDiscardSelects(true, clicked)
 		// Grandma clicked something
 		switch id {
-		case DISCARD_ID: // drawTile is already set
+		case -999: // drawTile is already set
 			enableStock(false, nil)
 			hiliteStock(false) // show
 			enableTake(false, nil)
@@ -197,9 +195,9 @@ func flowGrandma() bool {
 
 	// analyize the AI discard, if one
 	if take := players[AI].takeDiscard(); take != nil {
+		take.ID = -1
 		// if meld: add to melds and remove & blank melded tiles
 		if meld = players[PLAYER].detectMeld(take); meld != nil {
-			//toast(fmt.Sprintf("Meld: %s", meld.kind.String()))
 			players[PLAYER].addTakeMeld(*meld)
 			players[PLAYER].newMeld(meld)
 			players[PLAYER].addMeldPoints(meld)
@@ -236,7 +234,7 @@ func flowGrandma() bool {
 			return false
 		}
 		//  select a discard to replace it
-		clicked(DISCARD_ID)
+		clicked(-999) // magic number for this clicked
 	}
 	return true
 }

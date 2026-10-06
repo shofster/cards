@@ -22,6 +22,8 @@ import (
 
 type MeldType int
 
+type Melds []*Meld
+
 const (
 	MeldPair MeldType = iota
 	MeldPon
@@ -81,7 +83,7 @@ func (m *Meld) Score() int {
 	}
 }
 
-// create a Meld if the discard completes it.
+// create a Meld if the opponent's discard completes it.
 func DetectMeld(hasPair bool, hand Tiles, discard *Tile) *Meld {
 	// same rank melds
 	var matches Tiles

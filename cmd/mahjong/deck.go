@@ -1,6 +1,8 @@
 package main
 
 import (
+	"cards/assets/riichi/meld"
+	"fmt"
 	"math/rand/v2"
 	"sort"
 	"strings"
@@ -163,4 +165,40 @@ func DealTiles(deck Tiles, nHands, nCards int) ([]Tiles, Tiles) {
 		id++
 	}
 	return hands, deck[idx:]
+}
+
+// dummy tiles to replace Tile images
+func NewEmptyTile(id int) *Tile {
+	return &Tile{
+		Code:  "empty",
+		Suit:  "",
+		Rank:  0,
+		Red:   false,
+		ID:    id,
+		Dummy: true,
+	}
+}
+func NewBlankTile(id int) *Tile {
+	return &Tile{
+		Code:  "blank",
+		Suit:  "",
+		Rank:  0,
+		Red:   false,
+		ID:    id,
+		Dummy: true,
+	}
+}
+
+// get an image resource from meld or configured tileMap
+func getTileResource(code string) fyne.Resource {
+	// check meld and special resources
+	res, ok := meld.MeldResource[code]
+	if ok {
+		return res
+	}
+	res, ok = tileMap[code]
+	if ok {
+		return res
+	}
+	panic(fmt.Sprintf("getTileResource: code %s", code))
 }

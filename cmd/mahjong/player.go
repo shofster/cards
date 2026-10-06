@@ -1,7 +1,6 @@
 package main
 
 import (
-	"cards/assets/riichi/meld"
 	"cards/common"
 	"fmt"
 
@@ -26,7 +25,7 @@ import (
 type player struct {
 	id int // PLAYER = 0, AI = 1
 	//	icon                 string
-	tiles                []*Tile
+	tiles                Tiles
 	tileContainer        *fyne.Container // the current player Tiles
 	history              []Tile
 	historyContainer     *fyne.Container // the last discards dimmed
@@ -39,52 +38,6 @@ type player struct {
 	meldContainer        *fyne.Container // the player selected Melds
 	seat                 string          // East (North) or South
 	winner               bool
-}
-
-// dummy tiles to replace Tile images
-func NewEmptyTile(id int) *Tile {
-	return &Tile{
-		Code:  "empty",
-		Suit:  "",
-		Rank:  0,
-		Red:   false,
-		ID:    id,
-		Dummy: true,
-	}
-}
-func NewBlankTile(id int) *Tile {
-	return &Tile{
-		Code:  "blank",
-		Suit:  "",
-		Rank:  0,
-		Red:   false,
-		ID:    id,
-		Dummy: true,
-	}
-}
-func NewReverseTile(id int) *Tile {
-	return &Tile{
-		Code:  "reverse",
-		Suit:  "",
-		Rank:  0,
-		Red:   false,
-		ID:    id,
-		Dummy: true,
-	}
-}
-
-// get an image resource from meld or configured tileMap
-func getTileResource(code string) fyne.Resource {
-	// check meld and special resources
-	res, ok := meld.MeldResource[code]
-	if ok {
-		return res
-	}
-	res, ok = tileMap[code]
-	if ok {
-		return res
-	}
-	panic(fmt.Sprintf("getTileResource: code %s", code))
 }
 
 // initialize a hand and link images to the tiles in the hand
@@ -274,13 +227,13 @@ func (p *player) newMeld(meld *Meld) {
 
 	// blank out the tiles used in this meld
 	for _, tile := range meld.tiles {
-		if tile.ID != -1 {
+		if tile.ID != -1 { // was the opponent's discard
 			p.replaceHandTile(NewBlankTile(tile.ID))
 		}
 	}
 }
 
-// add a Meld image to the player's images
+// add a Meld image to the player's hand
 func (p *player) addTakeMeld(meld Meld) {
 	defer fyne.Do(func() {
 		p.takeContainer.Refresh()
@@ -292,7 +245,7 @@ func (p *player) addTakeMeld(meld Meld) {
 	}
 }
 
-// add a non-selectable Meld image to the hand
+// add a Meld image to the winning hand
 // call it a "Ron" type Meld - just for show.
 func (p *player) addWinnerMeld() {
 	defer fyne.Do(func() {

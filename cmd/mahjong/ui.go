@@ -299,13 +299,13 @@ func fakeDiscardMeldImages() []fyne.CanvasObject {
 	return objs
 }
 
-func fakeMelds() []*Meld {
+func fakeMelds() Melds {
 	var pair = Tiles{NewTile("🀇"), NewTile("🀇")}
 	var pon = Tiles{NewTile("🀙"), NewTile("🀙"), NewTile("🀙")}
 	chi := Tiles{NewTile("🀄"), NewTile("🀅"), NewTile("🀆")}
 	var kan = Tiles{NewTile("🀖"), NewTile("🀖"), NewTile("🀖"), NewTile("🀖")}
 	chi2 := Tiles{NewTile("🀄"), NewTile("🀅"), NewTile("🀆")}
-	return []*Meld{
+	return Melds{
 		NewMeld(MeldPair, true, pair),
 		NewMeld(MeldPon, true, pon),
 		NewMeld(MeldKan, true, kan),
@@ -314,7 +314,7 @@ func fakeMelds() []*Meld {
 	}
 }
 
-func buildMeldImages(melds []*Meld) []fyne.CanvasObject {
+func buildMeldImages(melds Melds) []fyne.CanvasObject {
 
 	common.DefaultCardImageWidth = Ctx.meldWidth
 	common.DefaultCardImageHeight = Ctx.meldHeight
