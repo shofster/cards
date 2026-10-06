@@ -192,9 +192,10 @@ func (p *player) replaceHandTile(tile *Tile) {
 	if tile.Code != "blank" {
 		Logit(func() string {
 			return fmt.Sprintf("replaceHandTile (%d) slot %d tile: %s with %s\n",
-				p.id, tile.ID, p.tiles[tile.ID].Code,
-				tile.Code)
+				p.id, tile.ID, p.tiles[tile.ID].Code, tile.Code)
 		})
+	} else {
+		return
 	}
 	defer fyne.Do(func() {
 		p.tileContainer.Refresh()
@@ -215,7 +216,7 @@ func (p *player) newMeld(meld *Meld) {
 
 	// add meld to player's list
 	p.melds = append(p.melds, meld)
-	// add each tile image
+	// and each tile image
 	for _, t := range meld.tiles {
 		ci := common.NewCardImage(getTileResource(t.Code), 0)
 		p.meldContainer.Objects = append(p.meldContainer.Objects, ci)
@@ -227,7 +228,7 @@ func (p *player) newMeld(meld *Meld) {
 
 	// blank out the tiles used in this meld
 	for _, tile := range meld.tiles {
-		if tile.ID != -1 { // was the opponent's discard
+		if tile.ID != -1 { //the opponent's discard
 			p.replaceHandTile(NewBlankTile(tile.ID))
 		}
 	}
@@ -258,7 +259,7 @@ func (p *player) addWinnerMeld() {
 	}
 }
 
-// determine if a Meld using hand and opponent's discard
+// determine if a Meld using hand tiles and opponent's discard
 func (p *player) detectMeld(discard *Tile) *Meld {
 	m := DetectMeld(p.hasPair, p.tiles, discard)
 	if m != nil {
