@@ -21,8 +21,14 @@ import (
 
 */
 /*
-  Description: function to support a "deck" of tiles.
+  Description: functions to support a "deck" of tiles.
 */
+
+const (
+	Manzu = "Man"
+	Pinzu = "Pin"
+	Souzu = "Sou"
+)
 
 type Tile struct {
 	Code  string
@@ -75,15 +81,15 @@ func parseTile(code string) (suit string, rank int, red bool) {
 	switch { // rnak 1 to 9
 	// Manzu 🀇–🀏
 	case u >= 0x1F007 && u <= 0x1F00F:
-		suit = "Man"
+		suit = Manzu
 		rank = u - 0x1F006
 	// Souzu 🀐–🀘
 	case u >= 0x1F010 && u <= 0x1F018:
-		suit = "Sou"
+		suit = Souzu
 		rank = u - 0x1F00F
 	// Pinzu 🀙–🀡
 	case u >= 0x1F019 && u <= 0x1F021:
-		suit = "Pin"
+		suit = Pinzu
 		rank = u - 0x1F018
 	// Winds 🀀–🀃  (4 - E,S,W,N)
 	case u >= 0x1F000 && u <= 0x1F003:
@@ -137,7 +143,7 @@ func ShuffleTiles(t Tiles) {
 }
 
 // Deal nTiles to nHands, return remaining deck.
-func DealTiles(tileDeck Tiles, nHands, nCards int) ([]Tiles, Tiles) {
+func DealTiles(deck Tiles, nHands, nCards int) ([]Tiles, Tiles) {
 	hands := make([]Tiles, nHands)
 	for i := range hands {
 		hands[i] = make([]*Tile, 0)
@@ -146,26 +152,15 @@ func DealTiles(tileDeck Tiles, nHands, nCards int) ([]Tiles, Tiles) {
 	id := 0
 	for range nCards {
 		for h := range nHands {
-			tile := tileDeck[idx]
+			tile := deck[idx]
 			tile.ID = id
 			hands[h] = append(hands[h], tile)
 			idx++ // index in the hand
-			if idx >= len(tileDeck) {
+			if idx >= len(deck) {
 				return hands, nil
 			}
 		}
 		id++
 	}
-	return hands, tileDeck[idx:]
-}
-
-func splitWalls(stock []Tile) (gmaWall, aiWall []Tile) {
-	for i, t := range stock {
-		if i%2 == 0 {
-			gmaWall = append(gmaWall, t)
-		} else {
-			aiWall = append(aiWall, t)
-		}
-	}
-	return
+	return hands, deck[idx:]
 }

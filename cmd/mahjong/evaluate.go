@@ -81,7 +81,7 @@ func (m *Meld) Score() int {
 	}
 }
 
-// discard is alway true in this game
+// create a Meld if the discard completes it.
 func DetectMeld(hasPair bool, hand Tiles, discard *Tile) *Meld {
 	// same rank melds
 	var matches Tiles
@@ -90,7 +90,7 @@ func DetectMeld(hasPair bool, hand Tiles, discard *Tile) *Meld {
 			matches = append(matches, h)
 		}
 	}
-	// 4 in hand can't be a meld, max = 3 (using discard)
+	// 4 in hand isnt valid
 	if len(matches) >= 4 {
 		return nil
 	}
@@ -110,10 +110,9 @@ func DetectMeld(hasPair bool, hand Tiles, discard *Tile) *Meld {
 		return NewMeld(MeldPair, false, matches)
 	}
 
-	// Chi
-	if discard.Suit == "Man" || discard.Suit == "Pin" || discard.Suit == "Sou" {
+	// Chi same-suit tiles by rank
+	if discard.Suit == Manzu || discard.Suit == Pinzu || discard.Suit == Souzu {
 		rank := discard.Rank
-		// same-suit tiles by rank
 		ranks := make(map[int]Tiles)
 		for _, h := range hand {
 			if h.Suit == discard.Suit {
@@ -139,131 +138,3 @@ func DetectMeld(hasPair bool, hand Tiles, discard *Tile) *Meld {
 
 	return nil
 }
-
-/*
-
-// find the tile that has the least meld possibility
-func (m *Meld) EstimateValue() int {
-	switch m.kind {
-	case MeldPair:
-		return 1
-	case MeldPon:
-		return 5
-	case MeldKan:
-		return 12
-	case MeldChi:
-		return 3
-	default:
-		return 0
-	}
-}
-
-// EvaluateTile gives a composite usefulness score for a tile.
-// Higher score = better tile to KEEP.
-// Lower score = worse tile to DISCARD.
-func EvaluateTile(p *player, t Tile) int {
-	if t.Dummy {
-		return -999 // never keep Dummy
-	}
-
-	score := 0
-
-	// 1. Meld potential (DetectMeld + EstimateValue)
-	if meld := DetectMeld(p.hasPair, p.tiles, &t); meld != nil {
-		score += meld.EstimateValue() // 1,3,5,12
-	}
-
-	// 2. Adjacency (rank ±1)
-	score += adjacencyScore(p, t)
-
-	// 3. Duplicate bonus (same tile)
-	score += duplicateScore(p, t)
-
-	// 4. Suit clustering (same suit neighbors)
-	score += suitClusterScore(p, t)
-
-	// 5. Pair protection (if no pair yet)
-	if !p.hasPair {
-		score += pairProtection(p, t)
-	}
-
-	// 6. Kan protection (3 copies in hand)
-	score += kanProtection(p, t)
-
-	return score
-}
-func adjacencyScore(p *player, t Tile) int {
-	bonus := 0
-	for _, x := range p.tiles {
-		if x.Dummy || x.Suit != t.Suit {
-			continue
-		}
-		if abs(x.Rank-t.Rank) == 1 {
-			bonus += 2
-		}
-	}
-	return bonus
-}
-func duplicateScore(p *player, t Tile) int {
-	count := 0
-	for _, x := range p.tiles {
-		if x.Dummy {
-			continue
-		}
-		if x.Suit == t.Suit && x.Rank == t.Rank {
-			count++
-		}
-	}
-	if count >= 2 {
-		return 3 // strong duplicate
-	}
-	return 0
-}
-func suitClusterScore(p *player, t Tile) int {
-	for _, x := range p.tiles {
-		if x.Dummy {
-			continue
-		}
-		if x.Suit == t.Suit {
-			return 1
-		}
-	}
-	return 0
-}
-func pairProtection(p *player, t Tile) int {
-	count := 0
-	for _, x := range p.tiles {
-		if x.Dummy {
-			continue
-		}
-		if x.Suit == t.Suit && x.Rank == t.Rank {
-			count++
-		}
-	}
-	if count == 2 {
-		return 4 // protect the pair
-	}
-	return 0
-}
-func kanProtection(p *player, t Tile) int {
-	count := 0
-	for _, x := range p.tiles {
-		if x.Dummy {
-			continue
-		}
-		if x.Suit == t.Suit && x.Rank == t.Rank {
-			count++
-		}
-	}
-	if count == 3 {
-		return 6 // protect potential Kan
-	}
-	return 0
-}
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
-*/

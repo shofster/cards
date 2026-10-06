@@ -280,7 +280,7 @@ func (p *player) newMeld(meld *Meld) {
 	}
 }
 
-// add a non-selectable Meld image to the hand
+// add a Meld image to the player's images
 func (p *player) addTakeMeld(meld Meld) {
 	defer fyne.Do(func() {
 		p.takeContainer.Refresh()
@@ -293,6 +293,7 @@ func (p *player) addTakeMeld(meld Meld) {
 }
 
 // add a non-selectable Meld image to the hand
+// call it a "Ron" type Meld - just for show.
 func (p *player) addWinnerMeld() {
 	defer fyne.Do(func() {
 		p.takeContainer.Refresh()
@@ -306,33 +307,12 @@ func (p *player) addWinnerMeld() {
 
 // determine if a Meld using hand and opponent's discard
 func (p *player) detectMeld(discard *Tile) *Meld {
-	//defer fmt.Println()
-	//fmt.Printf("detectMeld (%d) meld ", p.id)
 	m := DetectMeld(p.hasPair, p.tiles, discard)
 	if m != nil {
 		if m.kind == MeldPair {
 			p.hasPair = true
 		}
 		SortTiles(m.tiles)
-		//fmt.Printf("%s ", m.String())
-	} else {
-		//fmt.Printf("nil")
 	}
 	return m
-}
-
-func (p *player) hasWon() bool {
-	return len(p.melds) == 4 && p.hasPair
-}
-
-// winner
-func (p *player) HandScore() int {
-	score := 0
-	for _, m := range p.melds {
-		score += m.Score()
-	}
-	if p.hasWon() {
-		score += 5 // win bonus
-	}
-	return score
 }

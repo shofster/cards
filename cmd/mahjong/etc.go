@@ -18,7 +18,7 @@ import (
 
 */
 /*
-  Description: simple helper functions,
+  Description: helper functions.
 */
 
 // simple logger. turn off or on
@@ -41,16 +41,15 @@ func Logit(cb func() string) {
 */
 // wait on a series of FYNE.io non-UI thread updates
 func doWait(ops *[]func(), wait bool) {
-	if len(*ops) == 0 {
-		return
-	}
-	if wait {
-		for _, op := range *ops {
-			fyne.DoAndWait(op)
-		}
-	} else {
-		for _, op := range *ops {
-			fyne.Do(op)
+	if ops != nil && len(*ops) > 0 {
+		if wait {
+			for _, op := range *ops {
+				fyne.DoAndWait(op)
+			}
+		} else {
+			for _, op := range *ops {
+				fyne.Do(op)
+			}
 		}
 	}
 }

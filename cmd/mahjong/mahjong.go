@@ -26,15 +26,15 @@ import (
 /*
    Description: Main program for the mahjong game.
 
-in games:
+in cards:
 go build -v -trimpath -ldflags="-s -w -H=windowsgui" -o cmd/mahjong/mahjong.exe ./cmd/mahjong
 
 
-in games/cmd/mahjong:
+in cards/cmd/mahjong:
 fyne bundle -o splash.go --package main splash.png
 
 
-in games/cmd/mahjong:
+in cards/cmd/mahjong:
 fyne package --release --icon=splash.png --id=com.scsi.mahjong
 
 IntelliJ ---------
@@ -56,7 +56,7 @@ func main() {
 	Ctx.mainWindow = mahjong.NewWindow("Mahjong 4-1 (by Bob)")
 
 	setTheme()
-	Ctx.devMode = false
+	Ctx.devMode = false // debug logging
 
 	Ctx.mainWindow.SetIcon(resourceSplashPng)
 
@@ -80,7 +80,7 @@ func main() {
 	go func() { // show photo for a bit
 		initBoundVariables()
 		content := initUI()
-		time.Sleep(time.Millisecond * 3000)
+		time.Sleep(time.Millisecond * 2000)
 		fyne.Do(func() {
 			splash.RemoveAll()
 			splash.Add(content)
