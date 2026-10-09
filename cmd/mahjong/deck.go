@@ -27,9 +27,11 @@ import (
 */
 
 const (
-	Manzu = "Man"
-	Pinzu = "Pin"
-	Souzu = "Sou"
+	Manzu      = "Man"
+	Pinzu      = "Pin"
+	Souzu      = "Sou"
+	DragonSuit = "Dragon"
+	WindSuit   = "Wind"
 )
 
 type Tile struct {
@@ -95,11 +97,11 @@ func parseTile(code string) (suit string, rank int, red bool) {
 		rank = u - 0x1F018
 	// Winds 🀀–🀃  (4 - E,S,W,N)
 	case u >= 0x1F000 && u <= 0x1F003:
-		suit = "Wind"
+		suit = WindSuit
 		rank = u - 0x1EFF
 	// Dragons 🀄–🀆  (3 - white, green, red)
 	case u >= 0x1F004 && u <= 0x1F006:
-		suit = "Dragon"
+		suit = DragonSuit
 		rank = u - 0x1F003
 
 		/*

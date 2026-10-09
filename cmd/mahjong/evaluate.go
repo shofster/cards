@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 )
 
@@ -139,4 +140,100 @@ func DetectMeld(hasPair bool, hand Tiles, discard *Tile) *Meld {
 	}
 
 	return nil
+}
+
+// ------  possible discard evaluation  ------- \\
+
+func sameRank(a, b *Tile) bool { return a.Rank == b.Rank }
+func sameSuit(a, b *Tile) bool { return a.Suit == b.Suit }
+func isAdj(a, b *Tile) bool    { return abs(a.Rank-b.Rank) == 1 }
+func isNear(a, b *Tile) bool   { return abs(a.Rank-b.Rank) == 2 }
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+func (t *Tile) IsHonor() bool {
+	return t.Suit == WindSuit || t.Suit == DragonSuit
+}
+func (t *Tile) HasNoFriends(hand Tiles) bool {
+	for _, h := range hand {
+		if h.ID == t.ID {
+			continue
+		}
+		if sameRank(t, h) {
+			return false
+		}
+		if isAdj(t, h) {
+			return false
+		}
+		if isNear(t, h) {
+			return false
+		}
+		if sameSuit(t, h) {
+			return false
+		}
+	}
+	return true
+}
+
+func rateDiscard(candidate *Tile, hand Tiles, take *Tile) int {
+	score := 0
+	// how mush the candidate "likes" the new brother
+	if sameRank(candidate, take) {
+		score += 5
+	}
+	if isAdj(candidate, take) {
+		score += 3
+	}
+	if isNear(candidate, take) {
+		score += 1
+	}
+	if sameSuit(candidate, take) {
+		score += 1
+	}
+	// count if the candidate is a 2'nd cousin
+	for _, h := range hand {
+		if h.ID == candidate.ID {
+			continue
+		}
+		if sameRank(candidate, h) {
+			score += 4
+		}
+		if isAdj(candidate, h) {
+			score += 2
+		}
+		if isNear(candidate, h) {
+			score += 1
+		}
+		if sameSuit(candidate, h) {
+			score += 1
+		}
+	}
+	// Penalize isolated honors (no meld potential)
+	if candidate.IsHonor() && candidate.HasNoFriends(hand) {
+		score -= 2
+	}
+	return score
+}
+
+func BestDiscard(hand Tiles, take *Tile) int {
+	lowest := 999999
+	var candidates []int
+	for _, candidate := range hand {
+		if !candidate.Dummy {
+			score := rateDiscard(candidate, hand, take)
+			if score < lowest {
+				lowest = score
+				candidates = []int{candidate.ID}
+			} else if score == lowest {
+				candidates = append(candidates, candidate.ID)
+			}
+		}
+	}
+	if len(candidates) == 0 {
+		return -1
+	}
+	return candidates[rand.Intn(len(candidates))]
 }

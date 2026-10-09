@@ -34,6 +34,7 @@ type Global struct {
 	tileTheme             string
 	showAItiles           bool
 	devMode               bool
+	showHints             bool
 }
 
 var Ctx Global
@@ -59,11 +60,13 @@ func setTheme() {
 	Ctx.tileTheme = p.StringWithFallback("tile_theme", REGULAR)
 	Ctx.devMode = p.BoolWithFallback("dev-mode", true)
 	Ctx.showAItiles = p.BoolWithFallback("show-ai", false)
+	Ctx.showHints = p.BoolWithFallback("show-hints", true)
 	p.SetFloat("sizeWidth", float64(Ctx.width))
 	p.SetFloat("sizeHeight", float64(Ctx.height))
 	p.SetInt("offset", Ctx.offset)
 	p.SetString("tile_theme", Ctx.tileTheme)
 	p.SetBool("show-ai", Ctx.showAItiles)
+	p.SetBool("show-hints", Ctx.showHints)
 	//Ctx.tileTheme = "black"
 
 	Ctx.theme = &mahjongTheme{}

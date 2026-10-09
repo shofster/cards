@@ -29,6 +29,7 @@ type CardImage struct {
 	Img    *canvas.Image
 	Dim    *canvas.Rectangle
 	HiLite *canvas.Rectangle // outer glow
+	Mark   *canvas.Circle
 
 	MinWidth  float32
 	MinHeight float32
@@ -41,6 +42,7 @@ type CardImage struct {
 
 var DefaultCardImageWidth float32 = 100
 var DefaultCardImageHeight float32 = 140
+var DefaultCardImageMarkSize float32 = 18
 
 func NewCardImage(res fyne.Resource, id int) *CardImage {
 	img := canvas.NewImageFromResource(res)
@@ -58,10 +60,15 @@ func NewCardImage(res fyne.Resource, id int) *CardImage {
 	dim := canvas.NewRectangle(color.NRGBA{0, 0, 0, 60})
 	dim.Hide()
 
+	// the hint mark
+	mark := canvas.NewCircle(color.NRGBA{0, 200, 0, 180})
+	mark.Hide() // default hidden
+
 	c := &CardImage{
 		Img:       img,
 		HiLite:    hilite,
 		Dim:       dim,
+		Mark:      mark,
 		MinWidth:  DefaultCardImageWidth,
 		MinHeight: DefaultCardImageHeight,
 		ID:        id,
@@ -91,6 +98,9 @@ func (r *cardImageRenderer) Layout(size fyne.Size) {
 
 	// Dim overlay
 	r.c.Dim.Resize(size)
+
+	r.c.Mark.Resize(fyne.NewSize(DefaultCardImageMarkSize, DefaultCardImageMarkSize))
+	r.c.Mark.Move(fyne.NewPos(3, size.Height-DefaultCardImageMarkSize-3))
 }
 
 func (r *cardImageRenderer) MinSize() fyne.Size {
@@ -110,6 +120,7 @@ func (r *cardImageRenderer) Objects() []fyne.CanvasObject {
 		r.c.HiLite,
 		r.c.Img,
 		r.c.Dim,
+		r.c.Mark,
 	}
 }
 
@@ -157,6 +168,15 @@ func (c *CardImage) SetDimmed(on bool) {
 	} else {
 		c.Dim.Hide()
 		c.Enabled = true
+	}
+	c.Refresh()
+}
+
+func (c *CardImage) SetMark(on bool) {
+	if on {
+		c.Mark.Show()
+	} else {
+		c.Mark.Hide()
 	}
 	c.Refresh()
 }

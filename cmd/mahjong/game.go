@@ -155,29 +155,38 @@ func flowGrandma() bool {
 	}
 
 	var clicked func(id int)
+	var best int
+
 	clicked = func(id int) {
+
 		enableStock(false, nil)
 		enableTake(false, nil)
 		enablePlayerDiscardSelects(true, clicked)
-		// Grandma clicked something
+
+		var setupDiscard = func() {
+			if Ctx.showHints {
+				best = BestDiscard(players[PLAYER].tiles, drawTile)
+				players[PLAYER].hintDiscard(best, true)
+			}
+		}
+
 		switch id {
 		case -999: // drawTile is already set
-			enableStock(false, nil)
+			setupDiscard()
 			hiliteStock(false) // show
-			enableTake(false, nil)
-			toast(discardMessage)
 		case DRAW_ID: // selected the draw option
-			Logit(func() string { return fmt.Sprintf("* clicked: DRAW_ID -  ") })
-			toast(discardMessage)
+			setupDiscard()
 		case TAKE_ID:
 			drawTile = players[AI].discardTile
-			toast(discardMessage)
+			setupDiscard()
 
 		default: // id is the tile to replace
 			Logit(func() string { return fmt.Sprintf("clicked (0) on slot %d \n", id) })
-			enableStock(false, nil)
-			enableTake(false, nil)
 			drawTile.ID = id
+			if best != -1 {
+				players[PLAYER].hintDiscard(best, false)
+				best = -1
+			}
 			players[PLAYER].discard(players[PLAYER].tiles[id])
 			players[PLAYER].insert(drawTile)
 			enablePlayerDiscardSelects(false, nil)
@@ -246,31 +255,37 @@ func flowDragon() bool {
 		common.StringSet(turnState, PLAYER)
 	}
 
-	var selectDiscard = func() *Tile {
-		var candidates []int
-		p := players[AI]
-		for _, t := range p.tiles {
-			if !t.Dummy { // ignore blank/empty tiles
-				candidates = append(candidates, t.ID)
-			}
-		}
-		if len(candidates) == 0 {
-			return nil
-		}
-		id := rand.Intn(len(candidates))
-		Logit(func() string {
-			return fmt.Sprintf("AI selectDiscard (%d) tile %s %d\n", p.id,
-				p.tiles[candidates[id]].Code, p.tiles[candidates[id]].ID)
-		})
-		return p.tiles[id]
+	var drawTile *Tile
 
+	var selectDiscard = func() *Tile {
+
+		best := BestDiscard(players[AI].tiles, drawTile)
+		//fmt.Printf("AI: discard choice is %d\n", best)
+		return players[AI].tiles[best]
+
+		/*		var candidates []int
+				p := players[AI]
+				for _, t := range p.tiles {
+					if !t.Dummy { // ignore blank/empty tiles
+						candidates = append(candidates, t.ID)
+					}
+				}
+				if len(candidates) == 0 {
+					return nil
+				}
+				id := rand.Intn(len(candidates))
+				Logit(func() string {
+					return fmt.Sprintf("AI selectDiscard (%d) tile %s %d\n", p.id,
+						p.tiles[candidates[id]].Code, p.tiles[candidates[id]].ID)
+				})
+				return p.tiles[id]*/
 	}
 
 	var dragonDrawDiscard = func() bool {
-		if tile := stockDraw(); tile != nil {
+		if drawTile = stockDraw(); drawTile != nil {
 			id := selectDiscard()
 			players[AI].discard(id)
-			players[AI].insert(tile)
+			players[AI].insert(drawTile)
 			return true
 		}
 		return false

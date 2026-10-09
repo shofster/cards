@@ -119,6 +119,14 @@ func (p *player) disableDiscard() {
 	})
 }
 
+func (p *player) hintDiscard(id int, on bool) {
+	ci := p.tileContainer.Objects[id].(*common.CardImage)
+	ci.SetMark(on)
+	fyne.Do(func() {
+		p.discardTileContainer.Refresh()
+	})
+}
+
 func (p *player) takeDiscard() *Tile {
 	defer Logit(func() string { return "\n" })
 	Logit(func() string { return fmt.Sprintf("taking Discard (%d)", p.id) })
@@ -189,14 +197,10 @@ func (p *player) insert(tile *Tile) {
 // replace the hand Tile and its image with the new Tile
 // reset any attributes
 func (p *player) replaceHandTile(tile *Tile) {
-	if tile.Code != "blank" {
-		Logit(func() string {
-			return fmt.Sprintf("replaceHandTile (%d) slot %d tile: %s with %s\n",
-				p.id, tile.ID, p.tiles[tile.ID].Code, tile.Code)
-		})
-	} else {
-		return
-	}
+	Logit(func() string {
+		return fmt.Sprintf("replaceHandTile (%d) slot %d tile: %s with %s\n",
+			p.id, tile.ID, p.tiles[tile.ID].Code, tile.Code)
+	})
 	defer fyne.Do(func() {
 		p.tileContainer.Refresh()
 	})
