@@ -113,16 +113,16 @@ func (p *player) disableDiscard() {
 	p.discardTile = nil
 	ci := p.discardTileContainer.Objects[0].(*common.CardImage)
 	ci.Replace(getTileResource("empty"))
-	ci.SetDim(true)
 	fyne.Do(func() {
+		ci.SetDim(true)
 		p.discardTileContainer.Refresh()
 	})
 }
 
 func (p *player) hintDiscard(id int, on bool) {
 	ci := p.tileContainer.Objects[id].(*common.CardImage)
-	ci.SetMark(on)
 	fyne.Do(func() {
+		ci.SetMark(on)
 		p.discardTileContainer.Refresh()
 	})
 }

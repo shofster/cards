@@ -340,10 +340,19 @@ Play consists of alternating turns - starting with NaiNai:
 1) Automatically take the opponent's discard to form a Meld and discard the hand
  tiles that completes the Meld.
 2) If no discard, draw the next tile from the stock and choose a discard.
-3) If a discard but not a Meld member, draw the next tile from the stock and
+3) If a discard but not a Meld member, show the next tile from the stock and
  choose whether to accept the discard or the draw. Then, choose a discard.
 
-Play continues until one player wins - and receives +20 bonus points added to their score.
+Play continues until one player wins - and receives +20 bonus points added to
+ their score.
+
+**Added features include:**
+- Short prompts and a "action" button indicate the next action.
+- The option for NaiNai to either draw the next tile from the stock or take the
+tile discarded by XiaoLong that does not form a meld.
+- A blue "mark" (small blue dot) on a tile that is a suggested discard.
+- Available selections (button or tile choices)) are highlighted.
+
 
 
 --------------------------------------------------------------
@@ -351,6 +360,7 @@ Play continues until one player wins - and receives +20 bonus points added to th
 ## Tech Stuff
 
 Minumum GO version is 1.22 -- requires "math/rand/v2"
+Current go.mod file version is go 1.26
 
 Builds scripts are provided for Windows, MacOS, and LINUX OS'es
  for both AMD and ARM architectures.
@@ -362,7 +372,7 @@ Shared components:
 - CardMap (canonical lookup)
 - Deck (52‑card slice with random shuffle)
 - Deal (n-cards for m-hands, remaining deck)
-- assets (PNG card faces)
+- assets (PNG card / tile faces)
 - other helper functions.
 
 Everything else — rules, payouts, UI, and state machines —
@@ -397,6 +407,7 @@ Where:
 - com.scsi.rummy
 - com.scsi.cribbage
 - com.scsi.freecell
+- com.scsi.mahjong
 
 
 ---
