@@ -30,6 +30,7 @@ type CardImage struct {
 	Dim    *canvas.Rectangle
 	HiLite *canvas.Rectangle // outer glow
 	Mark   *canvas.Circle
+	Border *canvas.Rectangle
 
 	MinWidth  float32
 	MinHeight float32
@@ -43,6 +44,12 @@ type CardImage struct {
 var DefaultCardImageWidth float32 = 100
 var DefaultCardImageHeight float32 = 140
 var DefaultCardImageMarkSize float32 = 18
+var (
+	BorderRed    = color.NRGBA{R: 255, G: 0, B: 0, A: 255}
+	BorderYellow = color.NRGBA{R: 255, G: 255, B: 0, A: 255}
+	BorderGreen  = color.NRGBA{R: 0, G: 200, B: 0, A: 255}
+	BorderBlue   = color.NRGBA{R: 0, G: 0, B: 255, A: 255}
+)
 
 func NewCardImage(res fyne.Resource, id int) *CardImage {
 	img := canvas.NewImageFromResource(res)
@@ -64,11 +71,18 @@ func NewCardImage(res fyne.Resource, id int) *CardImage {
 	mark := canvas.NewCircle(color.NRGBA{0, 200, 0, 180})
 	mark.Hide() // default hidden
 
+	// outline border
+	border := canvas.NewRectangle(color.Transparent)
+	border.StrokeColor = color.NRGBA{255, 255, 0, 255}
+	border.StrokeWidth = 4
+	border.Hide()
+
 	c := &CardImage{
 		Img:       img,
 		HiLite:    hilite,
 		Dim:       dim,
 		Mark:      mark,
+		Border:    border,
 		MinWidth:  DefaultCardImageWidth,
 		MinHeight: DefaultCardImageHeight,
 		ID:        id,
@@ -99,8 +113,13 @@ func (r *cardImageRenderer) Layout(size fyne.Size) {
 	// Dim overlay
 	r.c.Dim.Resize(size)
 
+	// Mark
 	r.c.Mark.Resize(fyne.NewSize(DefaultCardImageMarkSize, DefaultCardImageMarkSize))
 	r.c.Mark.Move(fyne.NewPos(3, size.Height-DefaultCardImageMarkSize-3))
+
+	// Border
+	r.c.Border.Resize(fyne.NewSize(DefaultCardImageWidth, DefaultCardImageWidth))
+	r.c.Border.Move(fyne.NewPos(0, 0))
 }
 
 func (r *cardImageRenderer) MinSize() fyne.Size {
@@ -121,6 +140,7 @@ func (r *cardImageRenderer) Objects() []fyne.CanvasObject {
 		r.c.Img,
 		r.c.Dim,
 		r.c.Mark,
+		r.c.Border,
 	}
 }
 
@@ -140,6 +160,11 @@ func (c *CardImage) Replace(res fyne.Resource) {
 	img.FillMode = canvas.ImageFillContain
 	c.Img = img
 	c.Refresh()
+}
+
+func (c *CardImage) ReplaceImage(res fyne.Resource) {
+	c.Img.Resource = res
+	c.Img.Refresh()
 }
 
 func (c *CardImage) SetDim(on bool) {
@@ -179,6 +204,16 @@ func (c *CardImage) SetMark(on bool) {
 		c.Mark.Hide()
 	}
 	c.Refresh()
+}
+
+func (c *CardImage) ShowBorder(on bool, color color.Color) {
+	if on {
+		c.Border.StrokeColor = color
+		c.Border.Show()
+	} else {
+		c.Border.Hide()
+	}
+	c.Border.Refresh()
 }
 
 func (c *CardImage) Tapped(_ *fyne.PointEvent) {

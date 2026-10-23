@@ -42,13 +42,12 @@ const (
 )
 
 var (
-	tileMap        map[string]fyne.Resource
-	stock          Tiles
-	players        map[string]*player
-	winner         string
-	stockSlot      *fyne.Container
-	duration       time.Duration
-	discardMessage = "Choose a Discard"
+	tileMap   map[string]fyne.Resource
+	stock     Tiles
+	players   map[string]*player
+	winner    string
+	stockSlot *fyne.Container
+	duration  time.Duration
 )
 
 func initGame() {
