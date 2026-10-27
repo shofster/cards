@@ -99,6 +99,8 @@ func (j chessTheme) Size(name fyne.ThemeSizeName) float32 {
 		return 2 // spacing between label and widget
 	case theme.SizeNameText:
 		return base + 8
+	case theme.SizeNameHeadingText:
+		return float32(Ctx.dragSize)
 	}
 	return base
 }

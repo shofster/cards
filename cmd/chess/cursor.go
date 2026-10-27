@@ -5,9 +5,10 @@ import (
 	"cards/common"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 /*
@@ -31,7 +32,7 @@ import (
 
 type Cursor struct {
 	cursorIcon binding.String
-	obj        canvas.Text
+	obj        widget.Label
 	layer      *fyne.Container
 	show       bool
 }
@@ -41,16 +42,16 @@ func NewCursor() *Cursor {
 		cursorIcon: binding.NewString(),
 		show:       false,
 	}
-	c.obj = canvas.Text{
-		Alignment: 0,
-		Text:      "♚", // the UNICODE character to track position
-		TextSize:  float32(Ctx.dragSize),
-		TextStyle: fyne.TextStyle{
-			Bold:      true,
-			Monospace: false,
-			Symbol:    false,
-		},
-		FontSource: nil,
+	c.obj = widget.Label{
+		BaseWidget: widget.BaseWidget{},
+		Text:       "",
+		Alignment:  fyne.TextAlignCenter,
+		Wrapping:   0,
+		TextStyle:  fyne.TextStyle{},
+		Truncation: 0,
+		Importance: 0,
+		SizeName:   theme.SizeNameHeadingText,
+		Selectable: false,
 	}
 	c.cursorIcon.AddListener(binding.NewDataListener(func() {
 		c.obj.Text = chess.ChessUnicode[common.StringGet(c.cursorIcon)]

@@ -17,6 +17,7 @@ import "fmt"
   Description:
 */
 
+// search entire Board for a threat.
 func KingThreatened(side Suit) int {
 	kingID := FindKing(side)
 	if kingID < 0 {
@@ -26,11 +27,10 @@ func KingThreatened(side Suit) int {
 		if sq == nil {
 			continue
 		}
-		if sq.Suit == side {
+		if sq.Suit == side { // same suit
 			continue
 		}
 		moves := LegalMoves(id)
-
 		for _, move := range moves {
 			if move.ID == kingID {
 				return kingID
@@ -40,12 +40,12 @@ func KingThreatened(side Suit) int {
 	return -1
 }
 
+// locate the King of this suit
 func FindKing(side Suit) int {
 	for id, sq := range Board {
 		if sq == nil {
 			continue
 		}
-
 		if sq.Suit == side &&
 			sq.Rank == King {
 			return id
@@ -54,6 +54,7 @@ func FindKing(side Suit) int {
 	return -1
 }
 
+// single move result - linear index.
 type Move struct {
 	ID      int
 	Capture bool
@@ -68,6 +69,7 @@ func (m Move) String() string {
 		m.ID, row, col, Board[m.ID].Icon, m.Capture)
 }
 
+// list all the possible moves for this piece
 func LegalMoves(id int) []Move {
 	piece := Board[id]
 	if piece == nil {
@@ -79,18 +81,18 @@ func LegalMoves(id int) []Move {
 	case Knight:
 		return KnightMoves(Board, piece)
 	case Bishop:
-		return RayMoves(Board, piece, BishopDirs, 7)
+		return LgalPieceMoves(Board, piece, BishopDirs, 7)
 	case Rook:
-		return RayMoves(Board, piece, RookDirs, 7)
+		return LgalPieceMoves(Board, piece, RookDirs, 7)
 	case Queen:
-		return RayMoves(Board, piece, QueenDirs, 7)
+		return LgalPieceMoves(Board, piece, QueenDirs, 7)
 	case King:
-		return RayMoves(Board, piece, QueenDirs, 1)
+		return LgalPieceMoves(Board, piece, QueenDirs, 1)
 	}
 	return nil
 }
 
-func RayMoves(board [64]*ChessSquare, piece *ChessSquare, dirs []Delta, maxSteps int) []Move {
+func LgalPieceMoves(board [64]*ChessSquare, piece *ChessSquare, dirs []Delta, maxSteps int) []Move {
 	var moves []Move
 	for _, d := range dirs {
 		row := piece.Row
@@ -192,7 +194,6 @@ func PawnMoves(board [64]*ChessSquare, piece *ChessSquare) []Move {
 			})
 		}
 	}
-
 	return moves
 }
 
