@@ -402,7 +402,7 @@ fyne.Do(func() {} have been implemented. I think :-)
 Each app is a standalone Go executable:
 No external dependencies beyond Fyne.IO.
 Shared components:
-- Card (rank, suit, resource) (used for Mahjong tiles and Chess pieces)
+- Card (rank, suit, resource) (also used for Mahjong tiles and Chess pieces)
 - CardMap (canonical lookup)
 - Deck (52‑card slice with random shuffle)
 - Deal (n-cards for m-hands, remaining deck)
