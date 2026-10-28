@@ -31,16 +31,27 @@ import (
 var player *PlayerPanel
 var bot *PlayerPanel
 var chessBoard *fyne.Container
+var autoPlay bool
+var playerTurn *widget.Label
 
 func initUI() *fyne.Container {
+	playerTurn = widget.NewLabel("PLAY")
 	// necessary game variables
 	initGame()
 	return container.NewStack(initGameUI())
 }
 
 func initGameUI() *fyne.Container {
-	player = NewPlayerPanel(Ctx.playerName, White)
-	bot = NewPlayerPanel(Ctx.botName, Black)
+	playerControls := container.NewHBox()
+	playerControls.Add(playerTurn)
+	player = NewPlayerPanel(Ctx.playerName, White, playerControls)
+	botControls := container.NewHBox()
+	botControls.Add(widget.NewLabel("Auto"))
+	auto := common.NewToggle(func(b bool) {
+		autoPlay = b
+	})
+	botControls.Add(auto)
+	bot = NewPlayerPanel(Ctx.botName, Black, botControls)
 	chessBoard = NewChessBoard()
 	return container.NewBorder(nil, nil, player.content, bot.content, chessBoard)
 }
@@ -52,7 +63,7 @@ type PlayerPanel struct {
 	content   *fyne.Container
 }
 
-func NewPlayerPanel(title string, suit Suit) *PlayerPanel {
+func NewPlayerPanel(title string, suit Suit, controls *fyne.Container) *PlayerPanel {
 	pp := &PlayerPanel{
 		suit:     suit,
 		captured: make([]binding.String, 16),
@@ -80,6 +91,8 @@ func NewPlayerPanel(title string, suit Suit) *PlayerPanel {
 		container.NewCenter(widget.NewLabel(title)),
 		container.NewCenter(widget.NewLabel(SuitCode(suit))),
 		layout.NewSpacer(),
+		controls,
+		layout.NewSpacer(),
 		container.NewCenter(widget.NewLabel("Captured:")),
 		container.NewCenter(grid))
 
@@ -101,7 +114,7 @@ func (pp *PlayerPanel) addCapture(piece string) {
 	pp.nCaptured++
 }
 
-// swap the Board images for source and destination.
+// swap the Board images for source and destination
 func swapBoardPieceImages(sourceId, destinationId int) {
 	ci := CardImages.Objects[sourceId].(*common.CardImage)
 	res := ci.Img.Resource
@@ -110,6 +123,16 @@ func swapBoardPieceImages(sourceId, destinationId int) {
 	ci.ReplaceImage(res)
 	ci.Refresh()
 	fadeImage(ci, false)
+}
+
+func updatePlayerIndicator() {
+	switch activePlayerSuit {
+	case White:
+		playerTurn.Importance = widget.HighImportance
+	case Black:
+		playerTurn.Importance = widget.LowImportance
+	}
+	playerTurn.Refresh()
 }
 
 func fadeImage(ci *common.CardImage, fade bool) {

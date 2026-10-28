@@ -60,6 +60,13 @@ type Move struct {
 	Capture bool
 }
 
+// candidate Move for any piece
+type ChessMove struct {
+	SourceID      int
+	DestinationID int
+	Capture       bool
+}
+
 func (m Move) String() string {
 	row, col := ID2RowCol(m.ID)
 	if Board[m.ID] == nil {
@@ -81,18 +88,18 @@ func LegalMoves(id int) []Move {
 	case Knight:
 		return KnightMoves(Board, piece)
 	case Bishop:
-		return LgalPieceMoves(Board, piece, BishopDirs, 7)
+		return LegalPieceMoves(Board, piece, BishopDirs, 7)
 	case Rook:
-		return LgalPieceMoves(Board, piece, RookDirs, 7)
+		return LegalPieceMoves(Board, piece, RookDirs, 7)
 	case Queen:
-		return LgalPieceMoves(Board, piece, QueenDirs, 7)
+		return LegalPieceMoves(Board, piece, QueenDirs, 7)
 	case King:
-		return LgalPieceMoves(Board, piece, QueenDirs, 1)
+		return LegalPieceMoves(Board, piece, QueenDirs, 1)
 	}
 	return nil
 }
 
-func LgalPieceMoves(board [64]*ChessSquare, piece *ChessSquare, dirs []Delta, maxSteps int) []Move {
+func LegalPieceMoves(board [64]*ChessSquare, piece *ChessSquare, dirs []Delta, maxSteps int) []Move {
 	var moves []Move
 	for _, d := range dirs {
 		row := piece.Row

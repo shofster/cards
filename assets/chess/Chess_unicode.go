@@ -15,6 +15,11 @@ package chess
   Description: UNICODE's for dark / light pieces.
 */
 
+const (
+	BlackName = "GOLD"
+	WhiteName = "SILVER"
+)
+
 var ChessUnicode = map[string]string{
 	"gK":    "♚",
 	"gQ":    "♛",

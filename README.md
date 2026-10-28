@@ -1,6 +1,6 @@
 ## Game Summary
 
-This project includes six single‑player card games:
+This project includes 10 single‑player card games:
 
 - **Jacks or Better** – Classic video‑poker style game with hold/draw play. Two outcomes only: player win or dealer win.
 - **Stud Duel** – 5‑card stud with one‑card reveal streets and optional betting.
@@ -10,6 +10,8 @@ This project includes six single‑player card games:
 - **Rummy** – Single‑player Gin/Rummy with an AI opponent.
 - **Cribbage** – Single‑player Cribbage with an AI opponent.
 - **Freecell** - Freecell Solitaire.
+- **Mahjong** - One person Majong.
+- **Chess** - Single‑player Chess with / without an AI opponent.
 
 
 All functions are covered by a MIT license and free for use.
@@ -325,7 +327,7 @@ and interactive turn sequencing.
 It does not include full riichi rules such as yaku, fu, dora indicator,
 riichi declarations, kans, dead‑wall handling, or scoring.
 
-The 2 players are NaiNai [奶奶] (paternal grandmother) – you,
+The 2 players are NaiNai [奶奶] (paternal grandmother) – you
  and XiaoLong [小龙] (little dragon) – me.
 
 The winner is the first to form 4 melds and 1 pair.
@@ -355,24 +357,56 @@ tile discarded by XiaoLong that does not form a meld.
 
 
 
+### ♠ ♣ ♥ ♦  —  ♠ ♣ ♥ ♦
+
+## 10. (CHESS) Two-player or player-vs-AI.
+
+A simple one (PLAYER) two‑player (PLAYER and AI) chess game using
+ simple standard rules.
+
+White pieces are displayed using silver images.
+Black pieces are displayed using gold images..
+
+Play is done by making moves with mouse click selections:
+- Select a piece to move. White goes first.
+- Only pieces belonging to the active player may be selected.
+- That piece is marked with a yellow outline.
+- Select a valid square on the board to move that piece. A valid square is one allowed
+by chess piece movement rules.
+- Invalid move locations are shaded by dark gray.
+- To change the selected piece, click again to unselect.
+- If the selected move location is valid, that piece will fade from its original
+spot and appear at the new location.
+- If the destination square is occupied by an opponent's piece, that piece is captured
+,collected, and removed from the board.
+
+Play progresses with alternating player moves.
+The game is over when the player exits the game.
+If a king is in danger (check), it is highlighted with a red border.
+When "AUTO" is selected Black moves are controlled by "Chesster", the AI.
+  [Black gives priority to capturing moves.]
+  [Black makes no attempt to evade capture.]
+Castling,En-passant, and Pawn promotion are not supported.
+
+
 --------------------------------------------------------------
 
 ## Tech Stuff
 
-Minumum GO version is 1.22 -- requires "math/rand/v2"
-Current go.mod file version is go 1.26
+Minimum GO version is 1.22 -- requires "math/rand/v2"
+Current go.mod file version is go 1.26 and fyne.io/fyne/v2 v2.7.4
 
-Builds scripts are provided for Windows, MacOS, and LINUX OS'es
- for both AMD and ARM architectures.
+Situations requiring the new FYNE threading model usage
+fyne.Do(func() {} have been implemented. I think :-)
 
 Each app is a standalone Go executable:
 No external dependencies beyond Fyne.IO.
 Shared components:
-- Card (rank, suit, resource)
+- Card (rank, suit, resource) (used for Mahjong tiles and Chess pieces)
 - CardMap (canonical lookup)
 - Deck (52‑card slice with random shuffle)
 - Deal (n-cards for m-hands, remaining deck)
-- assets (PNG card / tile faces)
+- assets (PNG card / tile faces / chess pieces)
 - other helper functions.
 
 Everything else — rules, payouts, UI, and state machines —
@@ -382,7 +416,7 @@ Drag-and-Drop is implemented using a full container overlay for tracking
  and animation.
 Card image high-lighting is achieved via gray/yellow rectangle overlays.
 
-Each app has the same structure:
+Each app has similar structure:
 - XXXX.go - the main program.
 - prefs.go - optional and manually configurable parameters.
 - ui.go - the user interface (fyne.io).
@@ -408,13 +442,14 @@ Where:
 - com.scsi.cribbage
 - com.scsi.freecell
 - com.scsi.mahjong
+- com.scsi.chess
 
 
 ---
 
 ## Shared Engine
 
-All four apps use a unique card engine:
+All apps use a unique card engine:
 
 ### Card
 

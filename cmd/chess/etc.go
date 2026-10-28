@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cards/assets/chess"
 	"fmt"
 )
 
@@ -37,9 +38,9 @@ func otherPlayer(suit Suit) Suit {
 func SuitCode(s Suit) string {
 	switch s {
 	case Black:
-		return "GOLD"
+		return chess.BlackName
 	case White:
-		return "SILVER"
+		return chess.WhiteName
 	}
 	return fmt.Sprintf("%d", s)
 }

@@ -3,9 +3,11 @@ package main
 import (
 	"cards/assets/chess"
 	"cards/common"
+	"math/rand"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/widget"
 )
 
 /*
@@ -44,6 +46,7 @@ func initGame() {
 	blackKingWarn = -1
 	whiteKingWarn = -1
 	activePlayerSuit = White
+	playerTurn.Importance = widget.HighImportance
 	playSelect = NewPlaySelect()
 	cursor = NewCursor()
 	tracker = common.NewTracker()
@@ -57,6 +60,7 @@ func initGame() {
 		if first {
 			resetPlayerPanels()
 			first = false
+			playerTurn.Refresh()
 		}
 		onClickEvent(activePlayerSuit, down, ev)
 	}
@@ -113,24 +117,85 @@ func onClickEvent(suit Suit, down bool, ev *desktop.MouseEvent) {
 		borderImage(sourceId, false, common.BorderYellow)
 
 		// process the valid move
-		if capture { // save as captured
-			switch suit {
-			case White:
-				player.addCapture(chess.ChessUnicode[Board[destinationId].Icon])
-			case Black:
-				bot.addCapture(chess.ChessUnicode[Board[destinationId].Icon])
-			}
-		}
+		applyMove(sourceId, destinationId, capture)
+		endTurn()
 
-		// swap the Board entries
-		swapBoardPieceImages(sourceId, destinationId)
-		Board[destinationId] = Board[sourceId]
-		Board[sourceId] = nil
-		// new location for this piece
-		Board[destinationId].Row, Board[destinationId].Col = ID2RowCol(destinationId)
-
-		// alert to check on either King
-		kingWarn()
-		activePlayerSuit = otherPlayer(activePlayerSuit)
 	}
+}
+
+func applyMove(sourceId, destinationId int, capture bool) {
+	if capture {
+		switch activePlayerSuit {
+		case White:
+			player.addCapture(chess.ChessUnicode[Board[destinationId].Icon])
+		case Black:
+			bot.addCapture(chess.ChessUnicode[Board[destinationId].Icon])
+		}
+	}
+	swapBoardPieceImages(sourceId, destinationId)
+	Board[destinationId] = Board[sourceId]
+	Board[sourceId] = nil
+	Board[destinationId].Row, Board[destinationId].Col = ID2RowCol(destinationId)
+	activePlayerSuit = otherPlayer(activePlayerSuit)
+	updatePlayerIndicator()
+}
+
+func endTurn() {
+	kingWarn()
+	if autoPlay && activePlayerSuit == Black {
+		ChessterMove()
+	}
+}
+
+func ChessterMove() {
+	move, found := pickCaptureMove(activePlayerSuit)
+	if !found {
+		move = pickRandomMove(activePlayerSuit)
+	}
+	applyMove(move.SourceID, move.DestinationID, move.Capture)
+	endTurn()
+}
+
+func pickRandomMove(suit Suit) ChessMove {
+	var allMoves []ChessMove
+	for id, piece := range Board {
+		if piece == nil || piece.Suit != suit {
+			continue
+		}
+		for _, m := range LegalMoves(id) {
+			allMoves = append(allMoves, ChessMove{
+				SourceID:      id,
+				DestinationID: m.ID,
+				Capture:       m.Capture,
+			})
+		}
+	}
+	if len(allMoves) < 1 {
+		panic("no moves")
+	}
+	return allMoves[rand.Intn(len(allMoves))]
+}
+
+func pickCaptureMove(suit Suit) (ChessMove, bool) {
+	var captures []ChessMove
+	for id, piece := range Board {
+		if piece == nil || piece.Suit != suit {
+			continue
+		}
+		moves := LegalMoves(id)
+		for _, m := range moves {
+			if !m.Capture {
+				continue
+			}
+			captures = append(captures, ChessMove{
+				SourceID:      id,
+				DestinationID: m.ID,
+				Capture:       true,
+			})
+		}
+	}
+	if len(captures) == 0 {
+		return ChessMove{}, false
+	}
+	return captures[rand.Intn(len(captures))], true
 }
