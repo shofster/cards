@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
+
+    <defs>
+        <style>
+            .dark { fill: #c8eac8; }   /* dark-ish green */
+            .light { fill: #e9e2d4; }  /* light pearl */
+        </style>
+    </defs>
+
+    <g>
+        <!-- row 0 -->
+        <rect x="0"   y="0"   width="60" height="60" class="dark"/>
+        <rect x="60"  y="0"   width="60" height="60" class="light"/>
+        <rect x="120" y="0"   width="60" height="60" class="dark"/>
+        <rect x="180" y="0"   width="60" height="60" class="light"/>
+        <rect x="240" y="0"   width="60" height="60" class="dark"/>
+        <rect x="300" y="0"   width="60" height="60" class="light"/>
+        <rect x="360" y="0"   width="60" height="60" class="dark"/>
+        <rect x="420" y="0"   width="60" height="60" class="light"/>
+
+        <!-- row 1 -->
+        <rect x="0"   y="60"  width="60" height="60" class="light"/>
+        <rect x="60"  y="60"  width="60" height="60" class="dark"/>
+        <rect x="120" y="60"  width="60" height="60" class="light"/>
+        <rect x="180" y="60"  width="60" height="60" class="dark"/>
+        <rect x="240" y="60"  width="60" height="60" class="light"/>
+        <rect x="300" y="60"  width="60" height="60" class="dark"/>
+        <rect x="360" y="60"  width="60" height="60" class="light"/>
+        <rect x="420" y="60"  width="60" height="60" class="dark"/>
+
+        <!-- row 2 -->
+        <rect x="0"   y="120" width="60" height="60" class="dark"/>
+        <rect x="60"  y="120" width="60" height="60" class="light"/>
+        <rect x="120" y="120" width="60" height="60" class="dark"/>
+        <rect x="180" y="120" width="60" height="60" class="light"/>
+        <rect x="240" y="120" width="60" height="60" class="dark"/>
+        <rect x="300" y="120" width="60" height="60" class="light"/>
+        <rect x="360" y="120" width="60" height="60" class="dark"/>
+        <rect x="420" y="120" width="60" height="60" class="light"/>
+
+        <!-- row 3 -->
+        <rect x="0"   y="180" width="60" height="60" class="light"/>
+        <rect x="60"  y="180" width="60" height="60" class="dark"/>
+        <rect x="120" y="180" width="60" height="60" class="light"/>
+        <rect x="180" y="180" width="60" height="60" class="dark"/>
+        <rect x="240" y="180" width="60" height="60" class="light"/>
+        <rect x="300" y="180" width="60" height="60" class="dark"/>
+        <rect x="360" y="180" width="60" height="60" class="light"/>
+        <rect x="420" y="180" width="60" height="60" class="dark"/>
+
+        <!-- row 4 -->
+        <rect x="0"   y="240" width="60" height="60" class="dark"/>
+        <rect x="60"  y="240" width="60" height="60" class="light"/>
+        <rect x="120" y="240" width="60" height="60" class="dark"/>
+        <rect x="180" y="240" width="60" height="60" class="light"/>
+        <rect x="240" y="240" width="60" height="60" class="dark"/>
+        <rect x="300" y="240" width="60" height="60" class="light"/>
+        <rect x="360" y="240" width="60" height="60" class="dark"/>
+        <rect x="420" y="240" width="60" height="60" class="light"/>
+
+        <!-- row 5 -->
+        <rect x="0"   y="300" width="60" height="60" class="light"/>
+        <rect x="60"  y="300" width="60" height="60" class="dark"/>
+        <rect x="120" y="300" width="60" height="60" class="light"/>
+        <rect x="180" y="300" width="60" height="60" class="dark"/>
+        <rect x="240" y="300" width="60" height="60" class="light"/>
+        <rect x="300" y="300" width="60" height="60" class="dark"/>
+        <rect x="360" y="300" width="60" height="60" class="light"/>
+        <rect x="420" y="300" width="60" height="60" class="dark"/>
+
+        <!-- row 6 -->
+        <rect x="0"   y="360" width="60" height="60" class="dark"/>
+        <rect x="60"  y="360" width="60" height="60" class="light"/>
+        <rect x="120" y="360" width="60" height="60" class="dark"/>
+        <rect x="180" y="360" width="60" height="60" class="light"/>
+        <rect x="240" y="360" width="60" height="60" class="dark"/>
+        <rect x="300" y="360" width="60" height="60" class="light"/>
+        <rect x="360" y="360" width="60" height="60" class="dark"/>
+        <rect x="420" y="360" width="60" height="60" class="light"/>
+
+        <!-- row 7 (bottom) -->
+        <rect x="0"   y="420" width="60" height="60" class="light"/>
+        <rect x="60"  y="420" width="60" height="60" class="dark"/>
+        <rect x="120" y="420" width="60" height="60" class="light"/>
+        <rect x="180" y="420" width="60" height="60" class="dark"/>
+        <rect x="240" y="420" width="60" height="60" class="light"/>
+        <rect x="300" y="420" width="60" height="60" class="dark"/>
+        <rect x="360" y="420" width="60" height="60" class="light"/>
+        <rect x="420" y="420" width="60" height="60" class="dark"/>
+    </g>
+
+    <rect x="0" y="0" width="480" height="480" fill="none" stroke="black" stroke-width="4"/>
+</svg>
