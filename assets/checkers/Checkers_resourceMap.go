@@ -26,7 +26,7 @@ const (
 	RedName   = "RED"
 )
 
-var ChessResource = map[string]fyne.Resource{
+var CheckerResource = map[string]fyne.Resource{
 	"black":      resourceBlackCircPng,
 	"blackCrown": resourceBlackCircCrownPng,
 	"red":        resourceRedHexPng,
