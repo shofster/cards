@@ -4,6 +4,7 @@ import (
 	"cards/assets/chess"
 	"cards/common"
 	"math/rand"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -27,7 +28,8 @@ import (
 
 var (
 	// ChessPieces - fixed 8x8 squares with moveable pieces
-	Board [64]*ChessSquare
+	Board    [64]*ChessSquare
+	Resource map[string]fyne.Resource
 	// CardImages - fixed 8x8 slice and matching piece square
 	CardImages       *fyne.Container
 	cursor           *Cursor         // the cursor as a UNICODE char for a piece
@@ -41,6 +43,7 @@ var (
 )
 
 func initGame() {
+	Resource = PiecesMap()
 	buildBoard()
 	first = true
 	blackKingWarn = -1
@@ -143,25 +146,33 @@ func applyMove(sourceId, destinationId int, capture bool) {
 func endTurn() {
 	kingWarn()
 	if autoPlay && activePlayerSuit == Black {
-		ChessterMove()
+		go func() {
+			time.Sleep(time.Duration(Ctx.fadeTime) * time.Millisecond)
+			fyne.Do(func() {
+				ChessterMove()
+			})
+		}()
 	}
 }
 
 func ChessterMove() {
-	move, found := pickCaptureMove(activePlayerSuit)
+	move, found := pickKingMove(activePlayerSuit)
 	if !found {
-		move = pickRandomMove(activePlayerSuit)
+		move, found = pickCaptureMove(activePlayerSuit)
+		if !found {
+			move, found = pickRandomMove(activePlayerSuit)
+		}
 	}
-	applyMove(move.SourceID, move.DestinationID, move.Capture)
+	if found {
+		applyMove(move.SourceID, move.DestinationID, move.Capture)
+	}
 	endTurn()
 }
 
-func pickRandomMove(suit Suit) ChessMove {
-	var allMoves []ChessMove
-	for id, piece := range Board {
-		if piece == nil || piece.Suit != suit {
-			continue
-		}
+func pickKingMove(suit Suit) (ChessMove, bool) {
+	id := KingThreatened(suit)
+	if id >= 0 {
+		var allMoves []ChessMove
 		for _, m := range LegalMoves(id) {
 			allMoves = append(allMoves, ChessMove{
 				SourceID:      id,
@@ -169,11 +180,11 @@ func pickRandomMove(suit Suit) ChessMove {
 				Capture:       m.Capture,
 			})
 		}
+		if len(allMoves) > 0 {
+			return allMoves[rand.Intn(len(allMoves))], true
+		}
 	}
-	if len(allMoves) < 1 {
-		panic("no moves")
-	}
-	return allMoves[rand.Intn(len(allMoves))]
+	return ChessMove{}, false
 }
 
 func pickCaptureMove(suit Suit) (ChessMove, bool) {
@@ -198,4 +209,24 @@ func pickCaptureMove(suit Suit) (ChessMove, bool) {
 		return ChessMove{}, false
 	}
 	return captures[rand.Intn(len(captures))], true
+}
+
+func pickRandomMove(suit Suit) (ChessMove, bool) {
+	var allMoves []ChessMove
+	for id, piece := range Board {
+		if piece == nil || piece.Suit != suit {
+			continue
+		}
+		for _, m := range LegalMoves(id) {
+			allMoves = append(allMoves, ChessMove{
+				SourceID:      id,
+				DestinationID: m.ID,
+				Capture:       m.Capture,
+			})
+		}
+	}
+	if len(allMoves) < 1 {
+		return ChessMove{}, false
+	}
+	return allMoves[rand.Intn(len(allMoves))], true
 }

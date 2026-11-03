@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cards/assets/chess"
 	"image/color"
 	"os/user"
 	"strings"
@@ -28,6 +29,7 @@ type Global struct {
 	app        fyne.App
 	mainWindow fyne.Window
 	theme      fyne.Theme
+	pieces     string
 	playerName string
 	botName    string
 	squareSize int
@@ -55,6 +57,8 @@ func setTheme() {
 	p.SetInt("fadeTime", Ctx.fadeTime)
 	Ctx.botName = p.StringWithFallback("botName", "Chesster")
 	p.SetString("botName", Ctx.botName)
+	Ctx.pieces = p.StringWithFallback("pieces", "bw")
+	p.SetString("pieces", Ctx.pieces)
 	u, err := user.Current()
 	Ctx.playerName = "Player"
 	if err == nil && u.Username != "" {
@@ -75,6 +79,24 @@ func shortUsername(full string) string {
 var _ fyne.Theme = (*chessTheme)(nil)
 
 type chessTheme struct {
+}
+
+func PiecesMap() map[string]fyne.Resource {
+	switch Ctx.pieces {
+	case "bw":
+		return chess.ChessBWResource
+	default:
+		return chess.ChessResource
+	}
+}
+
+func PiecesName(piece string) string {
+	switch Ctx.pieces {
+	case "bw":
+		return chess.BWNames[piece]
+	default:
+		return chess.PieceNames[piece]
+	}
 }
 
 func (j chessTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {

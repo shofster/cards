@@ -1,7 +1,6 @@
 package main
 
 import (
-	"cards/assets/chess"
 	"cards/common"
 
 	"fyne.io/fyne/v2"
@@ -45,7 +44,7 @@ func NewChessBoard() *fyne.Container {
 		for col := range 8 {
 			id := RowCol2ID(row, col)
 			// transparent empty square
-			ci := common.NewCardImage(chess.ChessResource[EmptyCell], id)
+			ci := common.NewCardImage(Resource[EmptyCell], id)
 			// position inside the board’s 1px border
 			x := float32(col*SquareSize + 1)
 			y := float32(row*SquareSize + 1)
@@ -70,7 +69,7 @@ func NewChessBoard() *fyne.Container {
 			if key != EmptyCell { // the image widget
 				ix := row*8 + col
 				ci := CardImages.Objects[ix].(*common.CardImage)
-				ci.ReplaceImage(chess.ChessResource[key])
+				ci.ReplaceImage(Resource[key])
 			}
 		}
 	}

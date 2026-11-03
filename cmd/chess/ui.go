@@ -89,7 +89,7 @@ func NewPlayerPanel(title string, suit Suit, controls *fyne.Container) *PlayerPa
 	}
 	pp.content = container.NewVBox(
 		container.NewCenter(widget.NewLabel(title)),
-		container.NewCenter(widget.NewLabel(SuitCode(suit))),
+		container.NewCenter(widget.NewLabel(SuitName(suit))),
 		layout.NewSpacer(),
 		controls,
 		layout.NewSpacer(),

@@ -18,6 +18,8 @@ import "fyne.io/fyne/v2"
 
 fyne bundle -o pieces.go --package chess pieces
 
+fyne bundle -o bw.go --package chess bw
+
 <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
     <g>
         <rect x="0" y="0" width="100" height="100" fill="none" stroke="black" stroke-width="1"/>
@@ -44,4 +46,32 @@ var ChessResource = map[string]fyne.Resource{
 	"sHl":   resourceSKnightPng,
 	"sHr":   resourceSKnightRPng,
 	"empty": resourceEmptyPng,
+}
+
+var PieceNames = map[string]string{
+	"Black": "GOLD",
+	"White": "SILVER",
+}
+
+var ChessBWResource = map[string]fyne.Resource{
+	"gK":    resourceBKingPng,
+	"gQ":    resourceBQueenPng,
+	"gB":    resourceBBishopPng,
+	"gR":    resourceBRookPng,
+	"gP":    resourceBPawnPng,
+	"gHl":   resourceBKnightPng,
+	"gHr":   resourceBKnightRPng,
+	"sK":    resourceWKingPng,
+	"sQ":    resourceWQueenPng,
+	"sB":    resourceWBishopPng,
+	"sR":    resourceWRookPng,
+	"sP":    resourceWPawnPng,
+	"sHl":   resourceWKnightPng,
+	"sHr":   resourceWKnightRPng,
+	"empty": resourceBWemptyPng,
+}
+
+var BWNames = map[string]string{
+	"Black": "BLACK",
+	"White": "WHITE",
 }
