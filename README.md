@@ -1,6 +1,6 @@
 ## Game Summary
 
-This project includes 10 single‑player card games:
+This project includes 11 single‑player card games:
 
 - **Jacks or Better** – Classic video‑poker style game with hold/draw play. Two outcomes only: player win or dealer win.
 - **Stud Duel** – 5‑card stud with one‑card reveal streets and optional betting.
@@ -12,6 +12,7 @@ This project includes 10 single‑player card games:
 - **Freecell** - Freecell Solitaire.
 - **Mahjong** - One person Majong.
 - **Chess** - Single‑player Chess with / without an AI opponent.
+- **Checkers** - Single‑player Checkers with / without an AI opponent.
 
 
 All functions are covered by a MIT license and free for use.
@@ -362,31 +363,64 @@ tile discarded by XiaoLong that does not form a meld.
 ## 10. (CHESS) Two-player or player-vs-AI.
 
 A simple one (PLAYER) two‑player (PLAYER and AI) chess game using
- simple standard rules.
+simple standard rules.
 
-White pieces are displayed using silver images.
-Black pieces are displayed using gold images..
+White pieces may be displayed using silver images.
+Black pieces may be displayed using gold images.
 
 Play is done by making moves with mouse click selections:
 - Select a piece to move. White goes first.
 - Only pieces belonging to the active player may be selected.
 - That piece is marked with a yellow outline.
 - Select a valid square on the board to move that piece. A valid square is one allowed
-by chess piece movement rules.
+  by chess piece movement rules.
 - Invalid move locations are shaded by dark gray.
 - To change the selected piece, click again to unselect.
 - If the selected move location is valid, that piece will fade from its original
-spot and appear at the new location.
+  spot and appear at the new location.
 - If the destination square is occupied by an opponent's piece, that piece is captured
-,collected, and removed from the board.
+  ,collected, and removed from the board.
 
 Play progresses with alternating player moves.
 The game is over when the player exits the game.
 If a king is in danger (check), it is highlighted with a red border.
 When "AUTO" is selected Black moves are controlled by "Chesster", the AI.
-  [Black gives priority to capturing moves.]
-  [Black makes no attempt to evade capture.]
+[Black gives priority to capturing moves.]
+[Black makes no attempt to evade capture.]
 Castling,En-passant, and Pawn promotion are not supported.
+
+
+### ♠ ♣ ♥ ♦  —  ♠ ♣ ♥ ♦
+
+## 11. (CHECKERS) Two-player or player-vs-AI.
+
+A simple one (PLAYER) two‑player (PLAYER and AI) checkers game using
+ standard rules.
+
+Red hexagon pieces are yours.
+Black circle pieces belong "Checkers" - the AI.
+A pawn that reaches the opponent's King Row is crowned with a gold crown and becomes a King.
+
+
+Play is done by making moves with mouse click selections:
+- Select a piece to move. Red goes first.
+- Only pieces belonging to the active player may be selected.
+- That piece is marked with a yellow outline.
+- Select a valid destination square for that piece.
+Valid destinations are determined by standard checker movement rules.
+- Invalid destination squares are shaded dark gray.
+- To select a different piece, click the currently selected piece again to deselect it.
+- If the selected move location is valid, that piece will fade from its original
+  spot and appear at the new location.
+- If a move jumps over an opponent's piece, that piece is captured and removed from the board.
+
+Play progresses with alternating player moves.
+The current version does not detect win, loss, or draw conditions automatically.
+ Play continues until the player exits the game.
+When "AUTO" is selected Black moves are controlled by "Checkers", the AI.
+- [Black gives priority to capturing moves.]
+- [Black makes no attempt to evade capture.]
+
 
 
 --------------------------------------------------------------
@@ -397,7 +431,7 @@ Minimum GO version is 1.22 -- requires "math/rand/v2"
 Current go.mod file version is go 1.26 and fyne.io/fyne/v2 v2.7.4
 
 Situations requiring the new FYNE threading model usage
-fyne.Do(func() {} have been implemented. I think :-)
+fyne.Do(func() {}) have been implemented. I think :-)
 
 Each app is a standalone Go executable:
 No external dependencies beyond Fyne.IO.
@@ -406,7 +440,7 @@ Shared components:
 - CardMap (canonical lookup)
 - Deck (52‑card slice with random shuffle)
 - Deal (n-cards for m-hands, remaining deck)
-- assets (PNG card / tile faces / chess pieces)
+- assets (PNG card / tile faces / chess / checker pieces)
 - other helper functions.
 
 Everything else — rules, payouts, UI, and state machines —
@@ -443,6 +477,7 @@ Where:
 - com.scsi.freecell
 - com.scsi.mahjong
 - com.scsi.chess
+- com.scsi.checkers
 
 
 ---
